@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<title>Selmas magiske tre</title>
+<meta name="theme-color" content="#C79DEB" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Magisk tre" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="icon" href="icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+<!-- Enhjørning-illustrasjon: Twemoji (Twitter / jdecked), lisens CC-BY 4.0 -->
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body {
+    font-family: Nunito, system-ui, sans-serif;
+    background: linear-gradient(#D9C7F0, #F3EAFB);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: calc(env(safe-area-inset-top) + 14px) 12px calc(env(safe-area-inset-bottom) + 30px);
+    -webkit-user-select: none; user-select: none;
+  }
+  .card {
+    width: 100%; max-width: 460px; background: #FBF4FF;
+    border-radius: 26px; overflow: hidden; border: 3px solid #ECDDF7;
+    box-shadow: 0 14px 36px rgba(120,80,160,.22);
+  }
+  .header { position: relative; background: #C79DEB; }
+  .stripes { height: 10px; background: repeating-linear-gradient(45deg,#FFB6E1 0 14px,#C79DEB 14px 28px); }
+  .headerInner { display: flex; align-items: center; gap: 8px; padding: 8px 14px 14px; }
+  .title { margin: 0; font-family: Fredoka, sans-serif; font-weight: 700; font-size: 23px; color: #4A2E5E; line-height: 1.05; white-space: nowrap; }
+  .subtitle { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: #6E4A8C; }
+  .soundBtn { flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; border: 2px solid #9B6FD0; background: #FBF4FF; font-size: 20px; cursor: pointer; }
+  .starGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; place-items: center; padding: 18px 14px 4px; }
+  .count { text-align: center; font-family: Fredoka, sans-serif; font-weight: 700; font-size: 30px; color: #9B5DE5; margin: 2px 0 12px; }
+  .scene { position: relative; height: 224px; margin: 0 14px 18px; border-radius: 18px; overflow: hidden; background: linear-gradient(#E3D3F5, #F4ECFB); border: 3px solid #ECDDF7; }
+  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: linear-gradient(#8FCB72, #5FA049); }
+  .tree { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column-reverse; align-items: center; }
+  .ring { width: 22px; height: 14px; background: linear-gradient(#A9763F, #7E5530);
+    border-top: 1.5px solid rgba(60,46,30,.3); box-shadow: inset 0 0 0 1px rgba(60,46,30,.08); border-radius: 4px; position: relative; }
+  .leaf { position: absolute; top: 3px; width: 12px; height: 8px; background: #6BC98F; border-radius: 0 70% 0 70%; }
+  .leaf.l { left: -10px; transform: scaleX(-1); }
+  .leaf.r { right: -10px; }
+  .crown { position: relative; width: 104px; height: 66px; }
+  .blob { position: absolute; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8FE0B5, #4FAE86); box-shadow: inset -3px -4px 6px rgba(40,110,80,.35); }
+  .b1 { width: 46px; height: 46px; left: 29px; top: 18px; }
+  .b2 { width: 40px; height: 40px; left: 6px; top: 24px; }
+  .b3 { width: 40px; height: 40px; left: 58px; top: 24px; }
+  .b4 { width: 36px; height: 36px; left: 22px; top: 2px; }
+  .b5 { width: 36px; height: 36px; left: 46px; top: 4px; }
+  .blossom { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #FF9ECF; box-shadow: 0 0 0 2px #FFC9E6; }
+  .crown.bloom .blob { background: radial-gradient(circle at 35% 30%, #A6F0C9, #5BC698); }
+  .crown.bloom { animation: sparkleGlow 1.6s ease-in-out infinite; }
+  .treeStar { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 22px; }
+  .sceneUnicorn { position: absolute; left: 8px; bottom: 30px; }
+  .prizeWrap { position: absolute; top: 8px; right: 8px; text-align: center; }
+  .prizeLabel { font-size: 12px; font-weight: 800; color: #6E4A8C; margin-bottom: 2px; font-family: Fredoka, sans-serif; }
+  .prizeBox { width: 60px; height: 52px; background: rgba(251,244,255,.85); border: 3px dashed #9B6FD0; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .prizeBox.won { box-shadow: 0 0 0 4px #FFD23F, 0 8px 18px rgba(155,93,229,.4); }
+  .uni { transition: transform .35s ease; transform-origin: 50% 92%; }
+  .uni.magic { transform: translateY(-6px) rotate(-3deg); }
+  .bigBtn { display: block; width: calc(100% - 28px); margin: 0 14px 6px; padding: 18px 16px; font-family: Fredoka, sans-serif; font-size: 24px; font-weight: 700; color: #4A2E5E; background: linear-gradient(#FFC2E2, #C79DEB); border: none; border-radius: 18px; box-shadow: 0 6px 0 #9B6FD0, 0 10px 18px rgba(155,93,229,.35); cursor: pointer; }
+  .bigBtn:active { transform: translateY(3px); box-shadow: 0 3px 0 #9B6FD0; }
+  .bigBtn:disabled { opacity: .5; cursor: default; transform: none; box-shadow: 0 6px 0 #9B6FD0; }
+  .grownupToggle { display: block; margin: 10px auto 14px; padding: 6px 14px; background: transparent; border: none; color: #9079A6; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .grownupBox { margin: 0 14px 16px; padding: 14px; background: #F0E6FB; border-radius: 14px; font-size: 14px; color: #5C3D6E; }
+  .grownupRow { display: flex; justify-content: space-between; padding: 4px 0; font-weight: 700; }
+  .logList { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .logItem { background: #fff; border-radius: 8px; padding: 3px 8px; font-size: 12px; font-weight: 700; }
+  .btnRow { display: flex; gap: 8px; margin-top: 8px; }
+  .smallBtn { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #9B6FD0; background: #fff; color: #6E4A8C; font-weight: 800; cursor: pointer; }
+  .smallBtn.reset { border-color: #C45B8B; color: #C45B8B; }
+  .smallBtn:disabled { opacity: .4; }
+  .savedNote { text-align: center; font-size: 12px; color: #9079A6; margin: 10px 0 0; }
+  .star { animation: none; }
+  .star.pop { animation: pop .5s both; }
+  .overlay { position: fixed; inset: 0; background: rgba(60,40,80,.55); display: none; align-items: center; justify-content: center; padding: 16px; overflow: hidden; z-index: 50; }
+  .overlay.show { display: flex; }
+  .overlayCard { background: #FBF4FF; border-radius: 24px; padding: 26px 22px; text-align: center; max-width: 360px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.3); border: 4px solid #FFD23F; z-index: 2; }
+  .overlayCard .uni { display: inline-block; }
+  .hurra { font-family: Fredoka, sans-serif; font-weight: 700; font-size: 30px; color: #9B5DE5; margin: 6px 0; }
+  .wonText { font-size: 17px; font-weight: 700; color: #5C3D6E; margin: 4px 0; }
+  .wiggle { animation: wiggle 1s ease-in-out infinite; transform-origin: 50% 92%; display: inline-block; }
+  .confetti { position: absolute; top: -6vh; font-size: 26px; animation: fall linear forwards; }
+  @keyframes pop { 0%{transform:scale(0) rotate(-20deg)} 65%{transform:scale(1.3)} 100%{transform:scale(1)} }
+  @keyframes wiggle { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
+  @keyframes fall { from{transform:translateY(-10vh) rotate(0)} to{transform:translateY(110vh) rotate(360deg)} }
+  @keyframes dropIn { from{transform:translateY(-26px);opacity:0} to{transform:translateY(0);opacity:1} }
+  @keyframes twinkle { 0%,100%{opacity:1} 50%{opacity:.2} }
+  @keyframes sparkleGlow { 0%,100%{filter:drop-shadow(0 0 6px rgba(255,210,120,.5))} 50%{filter:drop-shadow(0 0 16px rgba(255,210,120,.95))} }
+  button:focus-visible { outline: 4px solid #7E57C2; outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="stripes"></div>
+    <div class="headerInner">
+      <span id="headUni"></span>
+      <div style="flex:1; min-width:0;">
+        <h1 class="title">Selmas magiske tre</h1>
+        <p class="subtitle">Lagt seg i tide = 1 stjerne 🌟</p>
+      </div>
+      <button class="soundBtn" id="soundBtn" aria-label="Lyd">🔊</button>
+    </div>
+  </div>
+
+  <div class="starGrid" id="starGrid"></div>
+  <div class="count" id="count"></div>
+
+  <div class="scene">
+    <div class="ground"></div>
+    <div class="prizeWrap">
+      <div class="prizeLabel">Premie</div>
+      <div class="prizeBox" id="prizeBox"></div>
+    </div>
+    <div class="tree" id="tree"></div>
+    <div class="sceneUnicorn" id="sceneUni"></div>
+  </div>
+
+  <button class="bigBtn" id="giveBtn">Gi en stjerne 🌟</button>
+  <button class="grownupToggle" id="grownupToggle">For mamma og pappa ▼</button>
+  <div class="grownupBox" id="grownupBox" style="display:none;">
+    <div class="grownupRow"><span>Premier vunnet</span><strong id="prizesWon">0 🦄</strong></div>
+    <div class="grownupRow"><span>Stjerner denne runden</span><strong id="roundCount">0 / 10</strong></div>
+    <div class="logList" id="logList"></div>
+    <div class="btnRow">
+      <button class="smallBtn" id="undoBtn">Angre siste</button>
+      <button class="smallBtn reset" id="resetBtn">Nullstill runde</button>
+    </div>
+    <p class="savedNote">Fremdriften lagres automatisk ✓</p>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlayCard">
+    <div class="wiggle" id="overlayUni"></div>
+    <h2 class="hurra">HURRA, SELMA!</h2>
+    <p class="wonText">Du fikk det magiske treet til å blomstre med <strong>10 stjerner</strong> 🌟</p>
+    <p class="wonText">Du har vunnet en enhjørning! 🦄</p>
+    <button class="bigBtn" id="newRoundBtn">Start ny runde</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var GOAL = 10;
+  var KEY = "selma-magisk-tre-v1";
+
+  var state = { stars: 0, log: [], prizesWon: 0, muted: false };
+  try {
+    var saved = localStorage.getItem(KEY);
+    if (saved) {
+      var s = JSON.parse(saved);
+      state.stars = s.stars || 0;
+      state.log = s.log || [];
+      state.prizesWon = s.prizesWon || 0;
+      state.muted = !!s.muted;
+    }
+  } catch (e) {}
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  // ---- Lyd ----
+  var actx = null;
+  function ctx() {
+    if (!actx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) actx = new AC();
+    }
+    return actx;
+  }
+  function tone(freq, start, dur, gain, type) {
+    var c = ctx(); if (!c) return;
+    if (c.state === "suspended") c.resume();
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = type || "triangle"; o.frequency.value = freq;
+    o.connect(g); g.connect(c.destination);
+    var t = c.currentTime + start;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain || 0.12, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function starSound() { if (state.muted) return; tone(784,0,0.12); tone(1047,0.12,0.18); }
+  function winSound() { if (state.muted) return; [659,784,988,1319].forEach(function(f,i){ tone(f,i*0.14,0.24,0.13,"triangle"); }); }
+
+  // ---- Enhjørning (Twemoji, CC-BY 4.0) ----
+  var UNI_PATHS = '<path fill="#C1CDD5" d="M36 19.854C33.518 9.923 25.006 1.909 16.031 6.832c0 0-4.522-1.496-5.174-1.948-.635-.44-1.635-.904-.912.436.423.782.875 1.672 2.403 3.317C8 12.958 9.279 18.262 7.743 21.75c-1.304 2.962-2.577 4.733-1.31 6.976 1.317 2.33 4.729 3.462 7.018 1.06 1.244-1.307.471-1.937 3.132-4.202 2.723-.543 4.394-1.791 4.394-4.375 0 0 .795-.382 1.826 6.009.456 2.818-.157 5.632-.039 8.783H36V19.854z"/><path fill="#60379A" d="M31.906 6.062c.531 1.312.848 3.71.595 5.318-.15-3.923-3.188-6.581-4.376-7.193-2.202-1.137-4.372-.979-6.799-.772.111.168.403.814.32 1.547-.479-.875-1.604-1.42-2.333-1.271-1.36.277-2.561.677-3.475 1.156-.504.102-1.249.413-2.372 1.101-1.911 1.171-4.175 4.338-6.737 3.511 1.042 2.5 3.631 1.845 3.631 1.845 1.207-1.95 4.067-3.779 6.168-4.452 7.619-1.745 12.614 3.439 15.431 9.398.768 1.625 2.611 7.132 4.041 10.292V10.956c-.749-1.038-1.281-3.018-4.094-4.894z"/><path fill="#C1CDD5" d="M13.789 3.662c.573.788 3.236.794 4.596 3.82 1.359 3.026-1.943 2.63-3.14 1.23-1.334-1.561-1.931-2.863-2.165-3.992-.124-.596-.451-2.649.709-1.058z"/><path fill="#758795" d="M14.209 4.962c.956.573 2.164 1.515 2.517 2.596.351 1.081-.707.891-1.349-.042-.641-.934-.94-1.975-1.285-2.263-.346-.289.117-.291.117-.291z"/><circle fill="#292F33" cx="15.255" cy="14.565" r=".946"/><path fill="#53626C" d="M8.63 26.877c.119.658-.181 1.263-.67 1.351-.49.089-.984-.372-1.104-1.03-.119-.659.182-1.265.671-1.354.49-.088.984.373 1.103 1.033z"/><path fill="#EE7C0E" d="M13.844 8.124l.003-.002-.005-.007-.016-.014c-.008-.007-.011-.019-.019-.025-.009-.007-.021-.011-.031-.018C12.621 7.078.933-.495.219.219-.51.948 10.443 9.742 11.149 10.28l.011.006.541.439c.008.007.01.018.018.024.013.01.028.015.042.024l.047.038-.009-.016c.565.361 1.427.114 1.979-.592.559-.715.577-1.625.066-2.079z"/><path fill="#C43512" d="M4.677 2.25l.009-.025c-.301-.174-.594-.341-.878-.5-.016.038-.022.069-.041.11-.112.243-.256.484-.429.716-.166.224-.349.424-.541.595-.02.018-.036.026-.056.043.238.22.489.446.745.676.234-.21.456-.449.654-.717.214-.287.395-.589.537-.898zm2.275 2.945c.306-.41.521-.822.66-1.212-.292-.181-.584-.36-.876-.538-.076.298-.247.699-.586 1.152-.31.417-.613.681-.864.845.259.223.52.445.779.665.314-.244.619-.552.887-.912zM9.87 7.32c.365-.49.609-.983.734-1.437l-.906-.586c-.023.296-.172.81-.631 1.425-.412.554-.821.847-1.1.978l.814.671c.381-.256.761-.611 1.089-1.051z"/>';
+  function unicorn(size, live) {
+    var sp = live ? '<path d="M2.5 2.5 l0.7 1.9 1.9 0.7 -1.9 0.7 -0.7 1.9 -0.7 -1.9 -1.9 -0.7 1.9 -0.7 z" fill="#FFF3C0" stroke="#F5C84B" stroke-width=".3" style="transform-origin:2.5px 2.5px; animation:twinkle 1.2s ease-in-out infinite"/>' : '';
+    return '<svg class="uni" width="'+size+'" height="'+size+'" viewBox="-2 -2 40 40" aria-hidden="true">' + UNI_PATHS + sp + '</svg>';
+  }
+
+  var STAR = "M12 1.6l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.4 5.8 20.6 7 13.7 2 8.8l6.9-1z";
+  function starSvg(filled, pop) {
+    return '<svg class="star'+(pop?' pop':'')+'" width="44" height="44" viewBox="0 0 24 24" '
+      + 'style="'+(filled?'filter:drop-shadow(0 3px 4px rgba(155,93,229,.45))':'')+'">'
+      + '<path d="'+STAR+'" fill="'+(filled?'#FFD23F':'#EADBF5')+'" stroke="'+(filled?'#E8A100':'#CBB7E0')+'" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+  }
+
+  // ---- Faste elementer ----
+  document.getElementById("headUni").innerHTML = unicorn(50, false);
+  document.getElementById("sceneUni").innerHTML = unicorn(96, true);
+  document.getElementById("overlayUni").innerHTML = unicorn(128, false);
+  document.getElementById("prizeBox").innerHTML = unicorn(46, false);
+
+  var els = {
+    starGrid: document.getElementById("starGrid"),
+    count: document.getElementById("count"),
+    tree: document.getElementById("tree"),
+    prizeBox: document.getElementById("prizeBox"),
+    giveBtn: document.getElementById("giveBtn"),
+    soundBtn: document.getElementById("soundBtn"),
+    grownupBox: document.getElementById("grownupBox"),
+    prizesWon: document.getElementById("prizesWon"),
+    roundCount: document.getElementById("roundCount"),
+    logList: document.getElementById("logList"),
+    undoBtn: document.getElementById("undoBtn"),
+    overlay: document.getElementById("overlay"),
+    sceneUni: function () { return document.querySelector("#sceneUni .uni"); }
+  };
+
+  var justEarned = -1;
+
+  function paint() {
+    // stjerner
+    var sg = "";
+    for (var i = 0; i < GOAL; i++) sg += starSvg(i < state.stars, i === justEarned);
+    els.starGrid.innerHTML = sg;
+    // teller
+    els.count.textContent = state.stars === GOAL ? "Alle 10! 🎉" : state.stars + " av " + GOAL;
+    // tre — stammen vokser for hver stjerne
+    var t = "";
+    for (var c = 0; c < state.stars; c++) {
+      var anim = (c === state.stars - 1) ? ' style="animation:dropIn .4s ease both"' : '';
+      t += '<div class="ring"' + anim + '>'
+         + (c === 2 || c === 5 ? '<span class="leaf l"></span><span class="leaf r"></span>' : '')
+         + '</div>';
+    }
+    if (state.stars > 0) {
+      var bloom = state.stars >= GOAL;
+      t += '<div class="crown' + (bloom ? ' bloom' : '') + '">'
+         + '<div class="blob b2"></div><div class="blob b3"></div>'
+         + '<div class="blob b4"></div><div class="blob b5"></div><div class="blob b1"></div>'
+         + (bloom ? '<div class="blossom" style="left:18px;top:30px"></div>'
+                  + '<div class="blossom" style="left:70px;top:30px"></div>'
+                  + '<div class="blossom" style="left:46px;top:14px"></div>'
+                  + '<div class="blossom" style="left:40px;top:44px"></div>' : '')
+         + '<div class="treeStar">' + (bloom ? '🌟' : '✨') + '</div>'
+         + '</div>';
+    }
+    els.tree.innerHTML = t;
+    // premie
+    els.prizeBox.className = "prizeBox" + (state.stars >= GOAL ? " won" : "");
+    // knapp / lyd
+    els.giveBtn.disabled = state.stars >= GOAL;
+    els.soundBtn.textContent = state.muted ? "🔇" : "🔊";
+    // voksen-panel
+    els.prizesWon.textContent = state.prizesWon + " 🦄";
+    els.roundCount.textContent = state.stars + " / " + GOAL;
+    els.undoBtn.disabled = state.stars === 0;
+    var ll = "";
+    for (var k = 0; k < state.log.length; k++) {
+      var dd = new Date(state.log[k]).toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" });
+      ll += '<span class="logItem">🌟 ' + dd + '</span>';
+    }
+    els.logList.innerHTML = ll;
+  }
+
+  function confetti() {
+    var emoji = ["⭐", "🦄", "🌸", "✨"];
+    for (var i = 0; i < 28; i++) {
+      var s = document.createElement("span");
+      s.className = "confetti";
+      s.textContent = emoji[i % 4];
+      s.style.left = (Math.random() * 100) + "%";
+      s.style.animationDelay = (Math.random() * 0.8) + "s";
+      s.style.animationDuration = (1.6 + Math.random() * 1.4) + "s";
+      els.overlay.appendChild(s);
+      (function (node) { setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 3500); })(s);
+    }
+  }
+
+  function showOverlay() { els.overlay.classList.add("show"); confetti(); }
+
+  function give() {
+    if (state.stars >= GOAL) return;
+    state.stars++;
+    state.log.push(new Date().toISOString());
+    justEarned = state.stars - 1;
+    save();
+    paint();
+    var u = els.sceneUni();
+    if (u) { u.classList.add("magic"); setTimeout(function () { u.classList.remove("magic"); }, 450); }
+    if (state.stars >= GOAL) { winSound(); setTimeout(showOverlay, 650); }
+    else { starSound(); }
+  }
+
+  els.giveBtn.addEventListener("click", give);
+  els.soundBtn.addEventListener("click", function () { state.muted = !state.muted; save(); paint(); });
+  els.undoBtn.addEventListener("click", function () {
+    if (state.stars <= 0) return;
+    state.stars--; state.log.pop(); justEarned = -1; save(); paint();
+  });
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    state.stars = 0; state.log = []; justEarned = -1; save(); paint();
+    els.overlay.classList.remove("show");
+  });
+  document.getElementById("newRoundBtn").addEventListener("click", function () {
+    state.prizesWon++; state.stars = 0; state.log = []; justEarned = -1; save(); paint();
+    els.overlay.classList.remove("show");
+  });
+  document.getElementById("grownupToggle").addEventListener("click", function () {
+    var open = els.grownupBox.style.display !== "none";
+    els.grownupBox.style.display = open ? "none" : "block";
+    this.textContent = open ? "For mamma og pappa ▼" : "Skjul ▲";
+  });
+
+  paint();
+  if (state.stars >= GOAL) els.overlay.classList.add("show");
+})();
+</script>
+</body>
+</html>

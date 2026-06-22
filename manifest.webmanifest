@@ -1,0 +1,15 @@
+{
+  "name": "Selmas magiske tre",
+  "short_name": "Magisk tre",
+  "description": "Stjernetavle med enhjørning som bygger et magisk tre",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3EAFB",
+  "theme_color": "#C79DEB",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
