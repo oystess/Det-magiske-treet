@@ -155,21 +155,40 @@
   var GOAL = 10;
   var KEY = "selma-magisk-tre-v1";
 
-  var state = { stars: 0, log: [], prizesWon: 0, muted: false };
+  // Tar imot hva som helst og gir alltid en brukbar state tilbake. Et ugyldig
+  // felt faller tilbake til standardverdien — resten beholdes som det er.
+  function reinState(raw) {
+    var d = { stars: 0, log: [], prizesWon: 0, muted: false };
+    if (!raw || typeof raw !== "object" || isArray(raw)) return d;
+    var n = Math.floor(Number(raw.stars));
+    if (isFinite(n) && n > 0) d.stars = Math.min(n, GOAL);
+    if (isArray(raw.log)) {
+      for (var i = 0; i < raw.log.length; i++) {
+        var v = raw.log[i];
+        if (typeof v === "string" && !isNaN(new Date(v).getTime())) d.log.push(v);
+      }
+    }
+    var p = Math.floor(Number(raw.prizesWon));
+    if (isFinite(p) && p > 0) d.prizesWon = p;
+    d.muted = !!raw.muted;
+    return d;
+  }
+  function isArray(v) { return Object.prototype.toString.call(v) === "[object Array]"; }
+
+  var state = reinState(null);
+  var hadSaved = false;
   try {
     var saved = localStorage.getItem(KEY);
-    if (saved) {
-      var s = JSON.parse(saved);
-      state.stars = s.stars || 0;
-      state.log = s.log || [];
-      state.prizesWon = s.prizesWon || 0;
-      state.muted = !!s.muted;
-    }
+    if (saved) { state = reinState(JSON.parse(saved)); hadSaved = true; }
   } catch (e) {}
 
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
   }
+
+  // Var det noe rart i lagringen, skriv den rensede versjonen tilbake med én gang
+  // så søppelet ikke blir liggende og dukke opp igjen ved neste oppstart.
+  if (hadSaved) save();
 
   // ---- Lyd ----
   var actx = null;
@@ -301,13 +320,23 @@
 
   function showOverlay() { els.overlay.classList.add("show"); confetti(); }
 
+  var lastGive = 0;
+
   function give() {
     if (state.stars >= GOAL) return;
+    // Knappen er stor og innbydende, og dobbelttrykk-zoom er av. To raske trykk
+    // skal være én stjerne, ikke to.
+    var now = Date.now();
+    if (now - lastGive < 800) return;
+    lastGive = now;
     state.stars++;
     state.log.push(new Date().toISOString());
     justEarned = state.stars - 1;
     save();
     paint();
+    // paint() har brukt den nå. Uten dette spretter samme stjerne opp igjen
+    // hver gang paint() kjøres av noe annet, f.eks. lyd av/på.
+    justEarned = -1;
     var u = els.sceneUni();
     if (u) { u.classList.add("magic"); setTimeout(function () { u.classList.remove("magic"); }, 450); }
     if (state.stars >= GOAL) { winSound(); setTimeout(showOverlay, 650); }
