@@ -39,10 +39,10 @@
   .soundBtn { flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; border: 2px solid #9B6FD0; background: #FBF4FF; font-size: 20px; cursor: pointer; }
   .starGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; place-items: center; padding: 18px 14px 4px; }
   .count { text-align: center; font-family: Fredoka, sans-serif; font-weight: 700; font-size: 30px; color: #9B5DE5; margin: 2px 0 12px; }
-  .scene { position: relative; height: 224px; margin: 0 14px 18px; border-radius: 18px; overflow: hidden; background: linear-gradient(#E3D3F5, #F4ECFB); border: 3px solid #ECDDF7; }
+  .scene { position: relative; height: 244px; margin: 0 14px 18px; border-radius: 18px; overflow: hidden; background: linear-gradient(#E3D3F5, #F4ECFB); border: 3px solid #ECDDF7; }
   .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: linear-gradient(#8FCB72, #5FA049); }
   .tree { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column-reverse; align-items: center; }
-  .ring { width: 22px; height: 14px; background: linear-gradient(#A9763F, #7E5530);
+  .ring { width: 22px; height: var(--ringH, 14px); background: linear-gradient(#A9763F, #7E5530);
     border-top: 1.5px solid rgba(60,46,30,.3); box-shadow: inset 0 0 0 1px rgba(60,46,30,.08); border-radius: 4px; position: relative; }
   .leaf { position: absolute; top: 3px; width: 12px; height: 8px; background: #6BC98F; border-radius: 0 70% 0 70%; }
   .leaf.l { left: -10px; transform: scaleX(-1); }
@@ -230,6 +230,13 @@
     overlay: document.getElementById("overlay"),
     sceneUni: function () { return document.querySelector("#sceneUni .uni"); }
   };
+
+  // Treet må få plass i scenen ved GOAL stjerner: stamme + krone + stjernen på toppen.
+  // Ringhøyden regnes ut i stedet for å være fast, så det også holder om GOAL endres.
+  var SCENE_H = 244, TREE_BOTTOM = 30, CROWN_H = 66, STAR_OVER = 16, CLEARANCE = 8;
+  var ringH = Math.max(6, Math.min(14,
+    Math.floor((SCENE_H - TREE_BOTTOM - CROWN_H - STAR_OVER - CLEARANCE) / GOAL)));
+  els.tree.style.setProperty("--ringH", ringH + "px");
 
   var justEarned = -1;
 
