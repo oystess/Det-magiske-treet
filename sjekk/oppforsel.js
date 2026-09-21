@@ -39,7 +39,9 @@ var s = f.suite("oppforsel");
   });
   await p.reload(); await p.waitForTimeout(300);
   s.t("ødelagt data klemmes til GOAL", await stjerner(), 10);
-  s.t("renset state skrives tilbake", JSON.parse(await lagret()).stars, 10);
+  // Klemmingen gjelder visningen, ikke disken. Skrev appen tilbake her, ville
+  // et besøk med lavere GOAL slettet stjerner for godt.
+  s.t("lagringen røres ikke bare av å åpne appen", JSON.parse(await lagret()).stars, 25);
 
   await p.evaluate(function () { localStorage.setItem("selma-magisk-tre-v1", "{ikke json"); });
   await p.reload(); await p.waitForTimeout(300);
@@ -48,6 +50,33 @@ var s = f.suite("oppforsel");
   s.t("uparsbar JSON overskrives ikke", await lagret(), "{ikke json");
   await p.click("#giveBtn"); await p.waitForTimeout(200);
   s.t("appen virker etter ødelagt data", await stjerner(), 1);
+
+  // Angre skal ikke la dobbelttrykk-sperren svelge neste ekte trykk.
+  await p.evaluate(function () {
+    localStorage.setItem("selma-magisk-tre-v1",
+      JSON.stringify({ stars: 3, log: ["2026-09-18T19:00:00.000Z"], prizesWon: 0, muted: true }));
+  });
+  await p.reload(); await p.waitForTimeout(300);
+  await p.click("#grownupToggle");
+  await p.click("#giveBtn"); await p.waitForTimeout(50);
+  await p.click("#undoBtn"); await p.waitForTimeout(50);
+  await p.click("#giveBtn"); await p.waitForTimeout(200);
+  s.t("stjerne rett etter angre blir registrert", await stjerner(), 4);
+
+  // Lagrede stjerner skal overleve at en forelder endrer GOAL — README
+  // inviterer til det, og et enkelt besøk skal ikke slette noe.
+  var fsm = require("fs"), osm = require("os"), ptm = require("path");
+  var lavGoal = ptm.join(osm.tmpdir(), "goal5-" + process.pid + ".html");
+  fsm.writeFileSync(lavGoal,
+    fsm.readFileSync(f.APP_FIL, "utf8").replace("var GOAL = 10;", "var GOAL = 5;"));
+  await p.evaluate(function () {
+    localStorage.setItem("selma-magisk-tre-v1",
+      JSON.stringify({ stars: 8, log: [], prizesWon: 1, muted: true }));
+  });
+  await p.goto("file://" + lavGoal); await p.waitForTimeout(300);
+  await p.goto(f.APP); await p.waitForTimeout(300);
+  s.t("stjerner overlever et besøk med lavere GOAL", JSON.parse(await lagret()).stars, 8);
+  fsm.unlinkSync(lavGoal);
 
   s.t("ingen JS-feil underveis", jsfeil, []);
   await b.close();

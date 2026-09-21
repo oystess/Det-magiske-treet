@@ -191,6 +191,9 @@
         if (typeof v === "string" && !isNaN(new Date(v).getTime())) d.log.push(v);
       }
     }
+    // Flere loggoppføringer enn stjerner er en inkonsistens: da ville
+    // foreldrepanelet vist et annet tall enn telleren. Behold de nyeste.
+    if (d.log.length > d.stars) d.log = d.log.slice(d.log.length - d.stars);
     var p = Math.floor(Number(raw.prizesWon));
     if (isFinite(p) && p > 0) d.prizesWon = p;
     d.muted = !!raw.muted;
@@ -199,19 +202,17 @@
   function isArray(v) { return Object.prototype.toString.call(v) === "[object Array]"; }
 
   var state = reinState(null);
-  var hadSaved = false;
   try {
     var saved = localStorage.getItem(KEY);
-    if (saved) { state = reinState(JSON.parse(saved)); hadSaved = true; }
+    if (saved) state = reinState(JSON.parse(saved));
   } catch (e) {}
 
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
   }
-
-  // Var det noe rart i lagringen, skriv den rensede versjonen tilbake med én gang
-  // så søppelet ikke blir liggende og dukke opp igjen ved neste oppstart.
-  if (hadSaved) save();
+  // Merk: appen skriver aldri til lagringen bare fordi den åpnes. Klemmingen
+  // over gjelder det appen viser, ikke det som ligger på telefonen — ellers
+  // ville et besøk med lavere GOAL slettet stjerner for godt.
 
   // ---- Lyd ----
   var actx = null;
@@ -300,6 +301,7 @@
   els.tree.style.setProperty("--ringH", ringH + "px");
 
   var justEarned = -1;
+  var lastGive = 0;
 
   function paint() {
     // stjerner
@@ -374,8 +376,6 @@
   }
 
   function showOverlay() { els.overlay.classList.add("show"); confetti(); }
-
-  var lastGive = 0;
 
   function give() {
     if (state.stars >= GOAL) return;
@@ -452,10 +452,10 @@
   els.soundBtn.addEventListener("click", function () { state.muted = !state.muted; save(); paint(); });
   els.undoBtn.addEventListener("click", function () {
     if (state.stars <= 0) return;
-    state.stars--; state.log.pop(); justEarned = -1; save(); paint();
+    state.stars--; state.log.pop(); justEarned = -1; lastGive = 0; save(); paint();
   });
   document.getElementById("resetBtn").addEventListener("click", function () {
-    state.stars = 0; state.log = []; justEarned = -1; save(); paint();
+    state.stars = 0; state.log = []; justEarned = -1; lastGive = 0; save(); paint();
     els.overlay.classList.remove("show");
   });
   document.getElementById("newRoundBtn").addEventListener("click", function () {

@@ -30,9 +30,19 @@ s.t("prizesWon negativ blir 0", reinState({ prizesWon: -2 }).prizesWon, 0);
 s.t("tom streng gir tom tavle", reinState(""), D);
 s.t("array inn gir tom tavle", reinState([1, 2, 3]), D);
 s.t("udefinert gir tom tavle", reinState(undefined), D);
+// stars må oppgis her, ellers klemmes loggen til null og vi tester
+// klemmingen i stedet for datofiltreringen.
 s.t("ugyldige datoer siles bort",
-    reinState({ log: ["2026-09-18T19:12:00.000Z", "bare tull", null, 42] }).log,
+    reinState({ stars: 4, log: ["2026-09-18T19:12:00.000Z", "bare tull", null, 42] }).log,
     ["2026-09-18T19:12:00.000Z"]);
+
+// Flere loggoppføringer enn stjerner ville gitt ett tall i telleren og et
+// annet i foreldrepanelet, og en unødig lang eksportkode.
+var mange = [];
+for (var q = 0; q < GOAL + 15; q++) mange.push("2026-09-0" + (q % 9 + 1) + "T19:00:00.000Z");
+s.t("log kuttes når stars klemmes", reinState({ stars: GOAL + 15, log: mange }).log.length, GOAL);
+s.t("kortere log enn stars røres ikke",
+    reinState({ stars: 5, log: ["2026-09-18T19:00:00.000Z"] }).log.length, 1);
 
 // Det som faktisk krasjet appen før valideringen fantes.
 var st = reinState({ stars: 3, log: "tull" });
