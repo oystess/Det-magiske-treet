@@ -22,6 +22,18 @@ s.t("ingen script-tagg med src", /<script[^>]+\bsrc=/i.test(src), false);
 s.t("siden er merket norsk", /<html[^>]+lang="nb"/.test(src), true);
 s.t("manifestet er lenket", /rel="manifest"/.test(src), true);
 
+// README skal ikke beskrive filer som ikke finnes, og ikke mangle filer den
+// beskriver. En forelder som følger oppskriften skal finne det som står der.
+var readme = fs.readFileSync(path.join(rot, "README.md"), "utf8");
+var sporet = require("child_process")
+  .execSync("git -C " + JSON.stringify(rot) + " ls-files").toString().split("\n");
+var nevnt = (readme.match(/`\.?[A-Za-z0-9_-]+\.(html|webmanifest|png|md|sh)`|`\.nojekyll`/g) || [])
+  .map(function (x) { return x.replace(/`/g, ""); })
+  .filter(function (v, i, a2) { return a2.indexOf(v) === i; });
+var mangler = nevnt.filter(function (n) { return sporet.indexOf(n) < 0; });
+s.t("README beskriver bare filer som finnes", mangler, []);
+s.t(".DS_Store er ikke sporet", sporet.indexOf(".DS_Store"), -1);
+
 // --- offline ---
 (async function () {
   var b = await f.start();

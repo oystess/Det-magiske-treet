@@ -39,8 +39,10 @@ Appen er én frittstående HTML-fil uten avhengigheter. Den lagrer fremgangen lo
 
 ## 💾 Lagring og personvern
 - All fremgang lagres lokalt på telefonen via nettleserens `localStorage` — ingenting sendes til noen server.
-- Dataene ligger på **den telefonen appen brukes på**.
-- «For mamma og pappa»-panelet har **Angre siste** og **Nullstill runde**.
+- Dataene ligger på **den telefonen appen brukes på**, men kan kopieres til en
+  annen telefon med sikkerhetskopien under.
+- «For mamma og pappa»-panelet har **Angre siste**, **Nullstill runde** og
+  **Sikkerhetskopi og flytting**.
 
 ### Sikkerhetskopi og flytting
 Under **For mamma og pappa → Sikkerhetskopi og flytting** ligger en kode som
@@ -79,7 +81,9 @@ Den rapporterer — den endrer ingenting.
 
 ## 🛠️ Tilpasning
 Alt ligger i `index.html`:
-- **Antall stjerner til premie:** endre `var GOAL = 10;` i `<script>`.
+- **Antall stjerner til premie:** endre `var GOAL = 10;` i `<script>`. Treet og
+  lydens tonegang tilpasser seg tallet av seg selv. Stjerner som allerede er
+  samlet blir liggende urørt, også om du senker tallet og hever det igjen.
 - **Tekst (navn, premie, overskrifter):** søk i HTML-en, f.eks. «Selmas magiske tre» eller «vunnet en enhjørning».
 - **Farger:** justeres i `<style>` (lavendel `#C79DEB`, lilla `#9B5DE5`, løvverk `#4FAE86`).
 - **Lyd:** av/på-knappen øverst til høyre; innstillingen huskes.
