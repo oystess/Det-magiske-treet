@@ -232,7 +232,23 @@
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.start(t); o.stop(t + dur + 0.05);
   }
-  function starSound() { if (state.muted) return; tone(784,0,0.12); tone(1047,0.12,0.18); }
+  // Tonen stiger med antall stjerner, så barnet hører at det nærmer seg målet.
+  // Durskala fra G4, med oktavskift videre oppover så det også holder om GOAL endres.
+  var DUR = [0, 2, 4, 5, 7, 9, 11];
+  function trinn(n) {
+    // Skalaen spres over runden i stedet for ett trinn per stjerne, så siste
+    // stjerne før mål alltid lander på samme topptone — også ved høy GOAL,
+    // der faste trinn ville blitt skingrende.
+    var siste = Math.max(1, GOAL - 2);
+    var d = Math.round(n / siste * 8);
+    return DUR[d % 7] + 12 * Math.floor(d / 7);
+  }
+  function starSound(n) {
+    if (state.muted) return;
+    var f = 392 * Math.pow(2, trinn(n) / 12);
+    tone(f, 0, 0.12);
+    tone(f * Math.pow(2, 5 / 12), 0.12, 0.18);
+  }
   function winSound() { if (state.muted) return; [659,784,988,1319].forEach(function(f,i){ tone(f,i*0.14,0.24,0.13,"triangle"); }); }
 
   // ---- Enhjørning (Twemoji, CC-BY 4.0) ----
@@ -366,7 +382,7 @@
     var u = els.sceneUni();
     if (u) { u.classList.add("magic"); setTimeout(function () { u.classList.remove("magic"); }, 450); }
     if (state.stars >= GOAL) { winSound(); setTimeout(showOverlay, 650); }
-    else { starSound(); }
+    else { starSound(state.stars - 1); }
   }
 
   // ---- Sikkerhetskopi ----
