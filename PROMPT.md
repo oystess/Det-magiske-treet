@@ -3,7 +3,7 @@
 Denne fila er en gjenbrukbar prompt for idémyldring. Kjør den i Claude Code når du
 vil ha friske ideer til appen. Alt under streken er selve prompten — kopier den,
 eller si til Claude: «Følg PROMPT.md». Skal noe faktisk bygges, se
-`PROMPT-topp-fem.md`.
+`PROMPT-topp-fem.md`. Skal noe kvalitetssikres, se `PROMPT-kvalitetsagent.md`.
 
 ---
 
