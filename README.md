@@ -58,6 +58,25 @@ telefonen. Import **erstatter** det som ligger der fra før, og spør først.
 
 ---
 
+## ✅ Sjekker
+
+Repoet har en sjekkesuite som kjører appen i en ekte nettleser:
+
+```bash
+./sjekk/kjor.sh            # alle grupper
+./sjekk/kjor.sh lyd uu     # bare noen
+BEHOLD=1 ./sjekk/kjor.sh   # la Playwright ligge mellom kjøringer
+```
+
+Playwright installeres midlertidig og fjernes etterpå — **appen og repoet
+forblir avhengighetsfrie**. Sjekkene dekker validering av lagrede data,
+dobbelttrykk, eksport/import, lydens tonegang, universell utforming med målt
+kontrast, treets geometri, og at rammene over holder.
+
+Claude Code har også en `kvalitetssikrer`-agent (`.claude/agents/`) som kjører
+suiten, leser diffen mot det commit-meldingene påstår, og rapporterer funn.
+Den rapporterer — den endrer ingenting.
+
 ## 🛠️ Tilpasning
 Alt ligger i `index.html`:
 - **Antall stjerner til premie:** endre `var GOAL = 10;` i `<script>`.
