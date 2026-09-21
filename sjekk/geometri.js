@@ -61,6 +61,33 @@ var s = f.suite("geometri");
   s.t("treet ved 3 stjerner er synlig, men ikke fullvokst",
       mal[3].hoyde > 40 && mal[3].hoyde < mal[10].hoyde, true);
 
+  // Treet skal få plass også om en forelder endrer GOAL — README inviterer
+  // til det, og commit 959e8e6 lovet at det holder.
+  var fsg = require("fs"), osg = require("os"), ptg = require("path");
+  var kilde = fsg.readFileSync(f.APP_FIL, "utf8");
+  var klippet = [];
+  var varianter = [3, 5, 15, 20, 22, 25, 30];
+  for (var vi = 0; vi < varianter.length; vi++) {
+    var G = varianter[vi];
+    var tmp = ptg.join(osg.tmpdir(), "goal-" + G + "-" + process.pid + ".html");
+    fsg.writeFileSync(tmp, kilde.replace("var GOAL = 10;", "var GOAL = " + G + ";"));
+    var cg = await b.newContext({ viewport: { width: 390, height: 844 } });
+    await f.medStjerner(cg, G);
+    var pg = await cg.newPage();
+    await pg.goto("file://" + tmp); await pg.waitForTimeout(300);
+    await pg.evaluate(function () {
+      var o = document.querySelector(".overlay"); if (o) o.classList.remove("show");
+    });
+    var klar = await pg.evaluate(function () {
+      var sc = document.querySelector(".scene").getBoundingClientRect();
+      var st = document.querySelector(".treeStar").getBoundingClientRect();
+      return +(st.top - sc.top).toFixed(1);
+    });
+    if (klar < 6) klippet.push("GOAL=" + G + ": " + klar + "px");
+    await cg.close(); fsg.unlinkSync(tmp);
+  }
+  s.t("treet får plass også ved endret GOAL", klippet, []);
+
   await b.close();
   s.slutt();
 })();
