@@ -77,6 +77,15 @@
   .smallBtn { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #9B6FD0; background: #fff; color: #6E4A8C; font-weight: 800; cursor: pointer; }
   .smallBtn.reset { border-color: #C45B8B; color: #C45B8B; }
   .smallBtn:disabled { opacity: .4; }
+  .backup { margin-top: 12px; border-top: 2px solid #E0D0F2; padding-top: 10px; }
+  .backup summary { font-weight: 800; color: #5C3D6E; cursor: pointer; font-size: 13px; }
+  .backupHelp { font-size: 12px; color: #5C3D6E; margin: 8px 0 6px; line-height: 1.4; }
+  .backup textarea { width: 100%; border: 2px solid #C9B2E4; border-radius: 10px; padding: 8px;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; color: #4A2E5E;
+    background: #fff; resize: vertical; -webkit-user-select: text; user-select: text; }
+  .backupMsg { font-size: 12px; font-weight: 700; margin: 8px 0 0; min-height: 16px; }
+  .backupMsg.ok { color: #2F7D55; }
+  .backupMsg.feil { color: #B23A6B; }
   .savedNote { text-align: center; font-size: 12px; color: #9079A6; margin: 10px 0 0; }
   .star { animation: none; }
   .star.pop { animation: pop .5s both; }
@@ -136,6 +145,18 @@
       <button class="smallBtn reset" id="resetBtn">Nullstill runde</button>
     </div>
     <p class="savedNote">Fremdriften lagres automatisk ✓</p>
+    <details class="backup">
+      <summary>Sikkerhetskopi og flytting</summary>
+      <p class="backupHelp">Stjernene ligger bare på denne telefonen. Kopier koden
+        og ta vare på den, eller send den til den andre forelderen.</p>
+      <textarea id="exportField" rows="3" readonly aria-label="Kode med fremdriften"></textarea>
+      <div class="btnRow"><button class="smallBtn" id="copyBtn">Kopier koden</button></div>
+      <p class="backupHelp">Lim inn en kode her for å hente inn fremdrift. Det som
+        ligger her nå blir erstattet.</p>
+      <textarea id="importField" rows="3" placeholder="Lim inn kode her" aria-label="Lim inn kode"></textarea>
+      <div class="btnRow"><button class="smallBtn" id="importBtn">Hent inn</button></div>
+      <p class="backupMsg" id="backupMsg" role="status" aria-live="polite"></p>
+    </details>
   </div>
 </div>
 
@@ -247,6 +268,9 @@
     logList: document.getElementById("logList"),
     undoBtn: document.getElementById("undoBtn"),
     overlay: document.getElementById("overlay"),
+    exportField: document.getElementById("exportField"),
+    importField: document.getElementById("importField"),
+    backupMsg: document.getElementById("backupMsg"),
     sceneUni: function () { return document.querySelector("#sceneUni .uni"); }
   };
 
@@ -302,6 +326,8 @@
       ll += '<span class="logItem">🌟 ' + dd + '</span>';
     }
     els.logList.innerHTML = ll;
+    // sikkerhetskopi
+    els.exportField.value = JSON.stringify(state);
   }
 
   function confetti() {
@@ -342,6 +368,56 @@
     if (state.stars >= GOAL) { winSound(); setTimeout(showOverlay, 650); }
     else { starSound(); }
   }
+
+  // ---- Sikkerhetskopi ----
+  function melding(tekst, klasse) {
+    els.backupMsg.textContent = tekst;
+    els.backupMsg.className = "backupMsg " + klasse;
+  }
+
+  // Skiller mellom "dette er ikke en kode" og "dette er en kode med rare felter".
+  // reinState() reparerer det siste; det første skal avvises, ikke stilltiende
+  // gjøres om til en tom tavle.
+  function tolkKode(tekst) {
+    var raw;
+    try { raw = JSON.parse(String(tekst).trim()); } catch (e) { return null; }
+    if (!raw || typeof raw !== "object" || isArray(raw)) return null;
+    if (raw.stars === undefined && raw.log === undefined) return null;
+    return reinState(raw);
+  }
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var tekst = els.exportField.value;
+    els.exportField.focus();
+    els.exportField.select();
+    function gikkBra() { melding("Kopiert ✓ Lim den inn et trygt sted.", "ok"); }
+    function gikkIkke() { melding("Fikk ikke kopiert. Merk teksten og kopier den selv.", "feil"); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tekst).then(gikkBra, function () {
+        try { document.execCommand("copy") ? gikkBra() : gikkIkke(); } catch (e) { gikkIkke(); }
+      });
+    } else {
+      try { document.execCommand("copy") ? gikkBra() : gikkIkke(); } catch (e) { gikkIkke(); }
+    }
+  });
+
+  document.getElementById("importBtn").addEventListener("click", function () {
+    var tekst = els.importField.value;
+    if (!tekst || !tekst.trim()) { melding("Lim inn en kode først.", "feil"); return; }
+    var ny = tolkKode(tekst);
+    if (!ny) { melding("Dette ser ikke ut som en kode fra appen. Sjekk at hele ble med.", "feil"); return; }
+    var hva = ny.stars + (ny.stars === 1 ? " stjerne" : " stjerner")
+            + " og " + ny.prizesWon + (ny.prizesWon === 1 ? " premie" : " premier");
+    if (!window.confirm("Hente inn " + hva + "?\n\nDet som ligger her nå blir borte.")) return;
+    state = ny;
+    justEarned = -1;
+    save();
+    paint();
+    els.importField.value = "";
+    els.overlay.classList.remove("show");
+    if (state.stars >= GOAL) showOverlay();
+    melding("Hentet inn ✓ " + hva + ".", "ok");
+  });
 
   els.giveBtn.addEventListener("click", give);
   els.soundBtn.addEventListener("click", function () { state.muted = !state.muted; save(); paint(); });

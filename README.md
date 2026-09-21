@@ -42,6 +42,20 @@ Appen er én frittstående HTML-fil uten avhengigheter. Den lagrer fremgangen lo
 - Dataene ligger på **den telefonen appen brukes på**.
 - «For mamma og pappa»-panelet har **Angre siste** og **Nullstill runde**.
 
+### Sikkerhetskopi og flytting
+Under **For mamma og pappa → Sikkerhetskopi og flytting** ligger en kode som
+inneholder hele fremdriften. Den kan brukes til å:
+
+- **ta vare på stjernene** i tilfelle telefonen ryker eller byttes,
+- **flytte tavla** til en ny telefon,
+- **gi den andre forelderen samme tavle** — send koden i en melding.
+
+Kopier koden fra det øverste feltet, og lim den inn i det nederste på den andre
+telefonen. Import **erstatter** det som ligger der fra før, og spør først.
+
+> 💡 Det skjer ingen automatisk sammenslåing. Gir begge foreldrene stjerner hver
+> for seg, er det koden som limes inn sist som gjelder.
+
 ---
 
 ## 🛠️ Tilpasning
