@@ -75,16 +75,16 @@
   .logItem { background: #fff; border-radius: 8px; padding: 3px 8px; font-size: 12px; font-weight: 700; }
   .btnRow { display: flex; gap: 8px; margin-top: 8px; }
   .smallBtn { flex: 1; touch-action: manipulation; padding: 10px; border-radius: 10px; border: 2px solid #9B6FD0; background: #fff; color: #6E4A8C; font-weight: 800; cursor: pointer; }
-  .smallBtn.reset { border-color: #C45B8B; color: #C45B8B; }
+  .smallBtn.reset { border-color: #B04575; color: #B04575; }
   .smallBtn:disabled { opacity: .4; }
   .backup { margin-top: 12px; border-top: 2px solid #E0D0F2; padding-top: 10px; }
-  .backup summary { font-weight: 800; color: #5C3D6E; cursor: pointer; font-size: 13px; }
+  .backup summary { touch-action: manipulation; font-weight: 800; color: #5C3D6E; cursor: pointer; font-size: 13px; }
   .backupHelp { font-size: 12px; color: #5C3D6E; margin: 8px 0 6px; line-height: 1.4; }
   .backup textarea { width: 100%; border: 2px solid #C9B2E4; border-radius: 10px; padding: 8px;
-    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; color: #4A2E5E;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 16px; color: #4A2E5E;
     background: #fff; resize: vertical; -webkit-user-select: text; user-select: text; }
   .backupMsg { font-size: 12px; font-weight: 700; margin: 8px 0 0; min-height: 16px; }
-  .backupMsg.ok { color: #2F7D55; }
+  .backupMsg.ok { color: #2A7150; }
   .backupMsg.feil { color: #B23A6B; }
   .sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
@@ -119,7 +119,7 @@
         <h1 class="title">Selmas magiske tre</h1>
         <p class="subtitle">Lagt seg i tide = 1 stjerne 🌟</p>
       </div>
-      <button class="soundBtn" id="soundBtn" aria-label="Lyd">🔊</button>
+      <button class="soundBtn" id="soundBtn" aria-pressed="false" aria-label="Lyd på">🔊</button>
     </div>
   </div>
 
@@ -352,6 +352,8 @@
     // knapp / lyd
     els.giveBtn.disabled = state.stars >= GOAL;
     els.soundBtn.textContent = state.muted ? "🔇" : "🔊";
+    els.soundBtn.setAttribute("aria-pressed", state.muted ? "true" : "false");
+    els.soundBtn.setAttribute("aria-label", state.muted ? "Lyd av" : "Lyd på");
     // voksen-panel
     els.prizesWon.textContent = state.prizesWon + " 🦄";
     els.roundCount.textContent = state.stars + " / " + GOAL;

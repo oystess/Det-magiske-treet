@@ -69,6 +69,72 @@ var s = f.suite("uu");
   // Telleren er 30px og bold — stor tekst, krav 3:1.
   s.t("kontrast teller >= 3.0 (" + k.teller.toFixed(2) + ")", k.teller >= 3.0, true);
 
+  // All tekst appen faktisk viser — ikke bare de fire som ble målt i facc5d2.
+  // Den kontrollen så ikke på teksten som var lagt til i commit-en før.
+  var lav = await p.evaluate(function () {
+    document.getElementById("grownupBox").style.display = "block";
+    document.querySelector(".backup").open = true;
+    function L(c) {
+      var v = c.match(/\d+/g).slice(0, 3).map(Number).map(function (x) { return x / 255; })
+        .map(function (x) { return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
+      return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+    }
+    function cr(a, b) { var x = [L(a), L(b)].sort(function (m, n) { return n - m; }); return (x[0] + 0.05) / (x[1] + 0.05); }
+    function bak(el) {
+      for (var n = el; n; n = n.parentElement) {
+        var c = getComputedStyle(n).backgroundColor;
+        if (c && c.indexOf("rgba(0, 0, 0, 0)") < 0 && c !== "transparent") return c;
+      }
+      return "rgb(243, 234, 251)";
+    }
+    var m = document.getElementById("backupMsg");
+    m.className = "backupMsg ok";
+    var par = [[".backupMsg.ok", m]];
+    var m2 = m.cloneNode(); m2.className = "backupMsg feil"; m2.textContent = "x";
+    m.parentNode.appendChild(m2); par.push([".backupMsg.feil", m2]);
+    [".backupHelp", ".backup summary", ".smallBtn", ".smallBtn.reset", ".logItem",
+     ".prizeLabel", ".grownupRow", ".wonText", ".subtitle", ".savedNote",
+     ".grownupToggle"].forEach(function (sel) {
+      var e = document.querySelector(sel); if (e) par.push([sel, e]);
+    });
+    var ut = [];
+    par.forEach(function (r) {
+      var st = getComputedStyle(r[1]);
+      var px = parseFloat(st.fontSize), fet = parseInt(st.fontWeight, 10) >= 700;
+      var krav = (px >= 24 || (px >= 18.66 && fet)) ? 3 : 4.5;
+      var v = cr(st.color, bak(r[1]));
+      if (v < krav) ut.push(r[0] + " " + v.toFixed(2) + " < " + krav);
+    });
+    m2.parentNode.removeChild(m2);
+    return ut;
+  });
+  s.t("all synlig tekst holder kontrastkravet", lav, []);
+
+  // iOS Safari zoomer inn på skjemafelt med skrift under 16px. Det var
+  // tidligere hindret av maximum-scale=1, som ble fjernet i facc5d2.
+  s.t("skjemafelt zoomer ikke inn på iOS", await p.evaluate(function () {
+    var ut = [];
+    Array.prototype.forEach.call(document.querySelectorAll("input, textarea, select"), function (e) {
+      var px = parseFloat(getComputedStyle(e).fontSize);
+      if (px < 16) ut.push((e.id || e.tagName) + " " + px + "px");
+    });
+    return ut;
+  }), []);
+
+  // Lydknappens tilstand må kunne høres, ikke bare ses. Sjekken må tåle
+  // hvilken som helst utgangstilstand — testen over har allerede klikket.
+  s.t("lydknappen melder tilstanden sin", await p.evaluate(function () {
+    var b = document.getElementById("soundBtn");
+    function les() {
+      return b.getAttribute("aria-pressed") + "/" + b.getAttribute("aria-label") +
+             "/" + b.textContent;
+    }
+    var a = les(); b.click(); var c = les(); b.click();
+    // Paret skal alltid være én av disse to, og et klikk skal bytte mellom dem.
+    var gyldig = ["false/Lyd på/🔊", "true/Lyd av/🔇"];
+    return [gyldig.indexOf(a) >= 0, gyldig.indexOf(c) >= 0, a !== c];
+  }), [true, true, true]);
+
   s.t("ingen JS-feil", jsfeil, []);
   await b.close();
   s.slutt();
