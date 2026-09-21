@@ -1,8 +1,9 @@
 # Prompt: Hvordan kan Selmas magiske tre bli bedre?
 
-Denne fila er en gjenbrukbar prompt. Kjør den i Claude Code i dette repoet når du
+Denne fila er en gjenbrukbar prompt for idémyldring. Kjør den i Claude Code når du
 vil ha friske ideer til appen. Alt under streken er selve prompten — kopier den,
-eller si til Claude: «Følg PROMPT.md».
+eller si til Claude: «Følg PROMPT.md». Skal noe faktisk bygges, se
+`PROMPT-topp-fem.md`.
 
 ---
 
