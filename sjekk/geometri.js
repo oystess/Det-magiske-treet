@@ -66,7 +66,8 @@ var s = f.suite("geometri");
   var fsg = require("fs"), osg = require("os"), ptg = require("path");
   var kilde = fsg.readFileSync(f.APP_FIL, "utf8");
   var klippet = [];
-  var varianter = [3, 5, 15, 20, 22, 25, 30];
+  // GOAL=21 er det trangeste tilfellet — det må være med.
+  var varianter = [1, 2, 3, 5, 10, 11, 15, 20, 21, 22, 25, 30];
   for (var vi = 0; vi < varianter.length; vi++) {
     var G = varianter[vi];
     var tmp = ptg.join(osg.tmpdir(), "goal-" + G + "-" + process.pid + ".html");
@@ -78,12 +79,15 @@ var s = f.suite("geometri");
     await pg.evaluate(function () {
       var o = document.querySelector(".overlay"); if (o) o.classList.remove("show");
     });
+    // Trekk fra kantlinja, så tallet er klaringen barnet faktisk ser.
     var klar = await pg.evaluate(function () {
-      var sc = document.querySelector(".scene").getBoundingClientRect();
+      var el = document.querySelector(".scene");
+      var sc = el.getBoundingClientRect();
+      var kant = parseFloat(getComputedStyle(el).borderTopWidth);
       var st = document.querySelector(".treeStar").getBoundingClientRect();
-      return +(st.top - sc.top).toFixed(1);
+      return +(st.top - sc.top - kant).toFixed(1);
     });
-    if (klar < 6) klippet.push("GOAL=" + G + ": " + klar + "px");
+    if (klar < 3) klippet.push("GOAL=" + G + ": " + klar + "px");
     await cg.close(); fsg.unlinkSync(tmp);
   }
   s.t("treet får plass også ved endret GOAL", klippet, []);

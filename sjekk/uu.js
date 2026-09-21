@@ -82,7 +82,14 @@ var s = f.suite("uu");
     function cr(a, b) { var x = [L(a), L(b)].sort(function (m, n) { return n - m; }); return (x[0] + 0.05) / (x[1] + 0.05); }
     function bak(el) {
       for (var n = el; n; n = n.parentElement) {
-        var c = getComputedStyle(n).backgroundColor;
+        var st = getComputedStyle(n);
+        // Knappene har gradient og ingen background-color; ta siste fargestopp
+        // som verste tilfelle.
+        if (st.backgroundImage && st.backgroundImage !== "none") {
+          var g = st.backgroundImage.match(/rgba?\([^)]+\)/g);
+          if (g) return g[g.length - 1];
+        }
+        var c = st.backgroundColor;
         if (c && c.indexOf("rgba(0, 0, 0, 0)") < 0 && c !== "transparent") return c;
       }
       return "rgb(243, 234, 251)";
@@ -92,10 +99,17 @@ var s = f.suite("uu");
     var par = [[".backupMsg.ok", m]];
     var m2 = m.cloneNode(); m2.className = "backupMsg feil"; m2.textContent = "x";
     m.parentNode.appendChild(m2); par.push([".backupMsg.feil", m2]);
-    [".backupHelp", ".backup summary", ".smallBtn", ".smallBtn.reset", ".logItem",
-     ".prizeLabel", ".grownupRow", ".wonText", ".subtitle", ".savedNote",
-     ".grownupToggle"].forEach(function (sel) {
-      var e = document.querySelector(sel); if (e) par.push([sel, e]);
+    // Sveip alt som faktisk har en tekstnode. En håndplukket liste er nettopp
+    // det som gjorde at facc5d2 ikke så teksten commit-en før hadde lagt til.
+    document.querySelector(".overlay").classList.add("show");
+    Array.prototype.forEach.call(document.querySelectorAll("body *"), function (e) {
+      var tekst = false;
+      for (var i = 0; i < e.childNodes.length; i++)
+        if (e.childNodes[i].nodeType === 3 && e.childNodes[i].textContent.trim()) tekst = true;
+      if (!tekst || e.disabled || e.classList.contains("sr")) return;
+      var st = getComputedStyle(e);
+      if (st.display === "none" || st.visibility === "hidden") return;
+      par.push([e.className || e.id || e.tagName, e]);
     });
     var ut = [];
     par.forEach(function (r) {
@@ -125,15 +139,25 @@ var s = f.suite("uu");
   // hvilken som helst utgangstilstand — testen over har allerede klikket.
   s.t("lydknappen melder tilstanden sin", await p.evaluate(function () {
     var b = document.getElementById("soundBtn");
-    function les() {
-      return b.getAttribute("aria-pressed") + "/" + b.getAttribute("aria-label") +
-             "/" + b.textContent;
-    }
+    function les() { return b.getAttribute("aria-label") + "/" + b.textContent; }
     var a = les(); b.click(); var c = les(); b.click();
-    // Paret skal alltid være én av disse to, og et klikk skal bytte mellom dem.
-    var gyldig = ["false/Lyd på/🔊", "true/Lyd av/🔇"];
-    return [gyldig.indexOf(a) >= 0, gyldig.indexOf(c) >= 0, a !== c];
-  }), [true, true, true]);
+    var gyldig = ["Slå lyden av/🔊", "Slå lyden på/🔇"];
+    // Tilstanden skal kodes ett sted. aria-pressed i tillegg til en etikett
+    // som skifter gir "Slå lyden av, ikke trykket" — to svar på ett spørsmål.
+    return [gyldig.indexOf(a) >= 0, gyldig.indexOf(c) >= 0, a !== c,
+            b.hasAttribute("aria-pressed")];
+  }), [true, true, true, false]);
+
+  // maximum-scale=1 er borte (riktig), så alt som trykkes på må selv si fra
+  // at dobbelttrykk ikke er zoom.
+  s.t("alt som trykkes på tåler dobbelttrykk", await p.evaluate(function () {
+    var ut = [];
+    Array.prototype.forEach.call(document.querySelectorAll("button, summary"), function (e) {
+      if (getComputedStyle(e).touchAction !== "manipulation")
+        ut.push(e.id || e.className || e.tagName);
+    });
+    return ut;
+  }), []);
 
   s.t("ingen JS-feil", jsfeil, []);
   await b.close();

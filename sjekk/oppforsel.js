@@ -38,7 +38,12 @@ var s = f.suite("oppforsel");
     localStorage.setItem("selma-magisk-tre-v1", '{"stars":25,"log":"tull"}');
   });
   await p.reload(); await p.waitForTimeout(300);
-  s.t("ødelagt data klemmes til GOAL", await stjerner(), 10);
+  s.t("for mange stjerner vises som GOAL", await stjerner(), 10);
+  // Foreldrepanelet må vise samme tall som telleren, ikke det rå.
+  s.t("panelet viser samme tall som telleren",
+      [await p.evaluate(function () { return document.getElementById("roundCount").textContent; }),
+       await p.evaluate(function () { return document.querySelectorAll("#logList .logItem").length; })],
+      ["10 / 10", 0]);
   // Klemmingen gjelder visningen, ikke disken. Skrev appen tilbake her, ville
   // et besøk med lavere GOAL slettet stjerner for godt.
   s.t("lagringen røres ikke bare av å åpne appen", JSON.parse(await lagret()).stars, 25);
@@ -77,6 +82,58 @@ var s = f.suite("oppforsel");
   await p.goto(f.APP); await p.waitForTimeout(300);
   s.t("stjerner overlever et besøk med lavere GOAL", JSON.parse(await lagret()).stars, 8);
   fsm.unlinkSync(lavGoal);
+
+  // Sperren må nullstilles overalt en runde begynner på nytt, ikke bare i
+  // angre og nullstill.
+  await p.evaluate(function () {
+    localStorage.setItem("selma-magisk-tre-v1",
+      JSON.stringify({ stars: 9, log: [], prizesWon: 0, muted: true }));
+  });
+  await p.reload(); await p.waitForTimeout(300);
+  await p.click("#giveBtn"); await p.waitForTimeout(700);
+  await p.click("#newRoundBtn");
+  await p.click("#giveBtn"); await p.waitForTimeout(200);
+  s.t("stjerne rett etter ny runde blir registrert", await stjerner(), 1);
+
+  // Feiringen skal kunne forlates uten å slette tavla.
+  await p.evaluate(function () {
+    localStorage.setItem("selma-magisk-tre-v1",
+      JSON.stringify({ stars: 10, log: [], prizesWon: 0, muted: true }));
+  });
+  await p.reload(); await p.waitForTimeout(400);
+  s.t("feiringen vises ved mål",
+      await p.evaluate(function () { return document.querySelector(".overlay").classList.contains("show"); }), true);
+  await p.keyboard.press("Escape"); await p.waitForTimeout(200);
+  s.t("Escape lukker feiringen uten å slette",
+      [await p.evaluate(function () { return document.querySelector(".overlay").classList.contains("show"); }),
+       JSON.parse(await lagret()).stars], [false, 10]);
+  await p.reload(); await p.waitForTimeout(400);
+  await p.click("#lukkBtn"); await p.waitForTimeout(200);
+  s.t("lukkeknappen lukker uten å slette",
+      [await p.evaluate(function () { return document.querySelector(".overlay").classList.contains("show"); }),
+       JSON.parse(await lagret()).stars], [false, 10]);
+  await p.reload(); await p.waitForTimeout(400);
+  await p.click(".overlay", { position: { x: 5, y: 5 } }); await p.waitForTimeout(200);
+  s.t("klikk utenfor lukker uten å slette",
+      [await p.evaluate(function () { return document.querySelector(".overlay").classList.contains("show"); }),
+       JSON.parse(await lagret()).stars], [false, 10]);
+
+  // README lover at stjerner ligger urørt om GOAL senkes og heves igjen.
+  // Da må heller ikke et trykk på en annen knapp skrive den klemte verdien.
+  var lavG = ptm.join(osm.tmpdir(), "goal5b-" + process.pid + ".html");
+  fsm.writeFileSync(lavG,
+    fsm.readFileSync(f.APP_FIL, "utf8").replace("var GOAL = 10;", "var GOAL = 5;"));
+  await p.evaluate(function () {
+    localStorage.setItem("selma-magisk-tre-v1",
+      JSON.stringify({ stars: 8, log: [], prizesWon: 0, muted: false }));
+  });
+  await p.goto("file://" + lavG); await p.waitForTimeout(350);
+  await p.keyboard.press("Escape"); await p.waitForTimeout(150);
+  await p.click("#soundBtn"); await p.waitForTimeout(200);
+  s.t("lydknappen sletter ikke stjerner ved lavere GOAL", JSON.parse(await lagret()).stars, 8);
+  await p.goto(f.APP); await p.waitForTimeout(300);
+  s.t("stjernene er tilbake når GOAL heves igjen", await stjerner(), 8);
+  fsm.unlinkSync(lavG);
 
   s.t("ingen JS-feil underveis", jsfeil, []);
   await b.close();

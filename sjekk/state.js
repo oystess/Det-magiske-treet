@@ -21,7 +21,9 @@ s.t("fersk app gir tom tavle", reinState(null), D);
 
 s.t("log som streng gir tom log", reinState({ stars: 3, log: "tull" }),
     { stars: 3, log: [], prizesWon: 0, muted: false });
-s.t("stars over GOAL klemmes", reinState({ stars: GOAL + 15 }).stars, GOAL);
+// Klemmingen hører hjemme i visningen. Kaster valideringen stjerner, er de
+// borte for godt neste gang appen lagrer.
+s.t("stars over GOAL bevares", reinState({ stars: GOAL + 15 }).stars, GOAL + 15);
 s.t("stars negativ blir 0", reinState({ stars: -5 }).stars, 0);
 s.t("stars som tekst blir 0", reinState({ stars: "tre" }).stars, 0);
 s.t("stars Infinity blir 0", reinState({ stars: Infinity }).stars, 0);
@@ -36,11 +38,10 @@ s.t("ugyldige datoer siles bort",
     reinState({ stars: 4, log: ["2026-09-18T19:12:00.000Z", "bare tull", null, 42] }).log,
     ["2026-09-18T19:12:00.000Z"]);
 
-// Flere loggoppføringer enn stjerner ville gitt ett tall i telleren og et
-// annet i foreldrepanelet, og en unødig lang eksportkode.
+// Loggen kortes ned i visningen, ikke i dataene — av samme grunn.
 var mange = [];
 for (var q = 0; q < GOAL + 15; q++) mange.push("2026-09-0" + (q % 9 + 1) + "T19:00:00.000Z");
-s.t("log kuttes når stars klemmes", reinState({ stars: GOAL + 15, log: mange }).log.length, GOAL);
+s.t("lang log bevares", reinState({ stars: GOAL + 15, log: mange }).log.length, GOAL + 15);
 s.t("kortere log enn stars røres ikke",
     reinState({ stars: 5, log: ["2026-09-18T19:00:00.000Z"] }).log.length, 1);
 

@@ -68,7 +68,7 @@
   .bigBtn { display: block; touch-action: manipulation; width: calc(100% - 28px); margin: 0 14px 6px; padding: 18px 16px; font-family: Fredoka, sans-serif; font-size: 24px; font-weight: 700; color: #4A2E5E; background: linear-gradient(#FFC2E2, #C79DEB); border: none; border-radius: 18px; box-shadow: 0 6px 0 #9B6FD0, 0 10px 18px rgba(155,93,229,.35); cursor: pointer; }
   .bigBtn:active { transform: translateY(3px); box-shadow: 0 3px 0 #9B6FD0; }
   .bigBtn:disabled { opacity: .5; cursor: default; transform: none; box-shadow: 0 6px 0 #9B6FD0; }
-  .grownupToggle { display: block; margin: 10px auto 14px; padding: 6px 14px; background: transparent; border: none; color: #745C8A; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .grownupToggle { display: block; touch-action: manipulation; margin: 10px auto 14px; padding: 6px 14px; background: transparent; border: none; color: #745C8A; font-weight: 700; font-size: 13px; cursor: pointer; }
   .grownupBox { margin: 0 14px 16px; padding: 14px; background: #F0E6FB; border-radius: 14px; font-size: 14px; color: #5C3D6E; }
   .grownupRow { display: flex; justify-content: space-between; padding: 4px 0; font-weight: 700; }
   .logList { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
@@ -93,7 +93,10 @@
   .star.pop { animation: pop .5s both; }
   .overlay { position: fixed; inset: 0; background: rgba(60,40,80,.55); display: none; align-items: center; justify-content: center; padding: 16px; overflow: hidden; z-index: 50; }
   .overlay.show { display: flex; }
-  .overlayCard { background: #FBF4FF; border-radius: 24px; padding: 26px 22px; text-align: center; max-width: 360px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.3); border: 4px solid #FFD23F; z-index: 2; }
+  .lukkBtn { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px;
+    border-radius: 12px; border: 2px solid #9B6FD0; background: #FBF4FF; color: #4A2E5E;
+    font-size: 20px; font-weight: 800; line-height: 1; cursor: pointer; touch-action: manipulation; }
+  .overlayCard { position: relative; background: #FBF4FF; border-radius: 24px; padding: 26px 22px; text-align: center; max-width: 360px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.3); border: 4px solid #FFD23F; z-index: 2; }
   .overlayCard .uni { display: inline-block; }
   .hurra { font-family: Fredoka, sans-serif; font-weight: 700; font-size: 30px; color: #9B5DE5; margin: 6px 0; }
   .wonText { font-size: 17px; font-weight: 700; color: #5C3D6E; margin: 4px 0; }
@@ -119,7 +122,7 @@
         <h1 class="title">Selmas magiske tre</h1>
         <p class="subtitle">Lagt seg i tide = 1 stjerne 🌟</p>
       </div>
-      <button class="soundBtn" id="soundBtn" aria-pressed="false" aria-label="Lyd på">🔊</button>
+      <button class="soundBtn" id="soundBtn" aria-label="Slå lyden av">🔊</button>
     </div>
   </div>
 
@@ -163,9 +166,10 @@
 </div>
 
 <div class="overlay" id="overlay">
-  <div class="overlayCard">
+  <div class="overlayCard" role="dialog" aria-modal="true" aria-labelledby="hurra">
+    <button class="lukkBtn" id="lukkBtn" aria-label="Lukk">✕</button>
     <div class="wiggle" id="overlayUni"></div>
-    <h2 class="hurra">HURRA, SELMA!</h2>
+    <h2 class="hurra" id="hurra">HURRA, SELMA!</h2>
     <p class="wonText">Du fikk det magiske treet til å blomstre med <strong>10 stjerner</strong> 🌟</p>
     <p class="wonText">Du har vunnet en enhjørning! 🦄</p>
     <button class="bigBtn" id="newRoundBtn">Start ny runde</button>
@@ -184,16 +188,15 @@
     var d = { stars: 0, log: [], prizesWon: 0, muted: false };
     if (!raw || typeof raw !== "object" || isArray(raw)) return d;
     var n = Math.floor(Number(raw.stars));
-    if (isFinite(n) && n > 0) d.stars = Math.min(n, GOAL);
+    // Ikke klemt til GOAL: det som ligger på telefonen skal bevares som det er.
+    // Senker en forelder GOAL, skal stjernene komme tilbake når tallet heves.
+    if (isFinite(n) && n > 0) d.stars = n;
     if (isArray(raw.log)) {
       for (var i = 0; i < raw.log.length; i++) {
         var v = raw.log[i];
         if (typeof v === "string" && !isNaN(new Date(v).getTime())) d.log.push(v);
       }
     }
-    // Flere loggoppføringer enn stjerner er en inkonsistens: da ville
-    // foreldrepanelet vist et annet tall enn telleren. Behold de nyeste.
-    if (d.log.length > d.stars) d.log = d.log.slice(d.log.length - d.stars);
     var p = Math.floor(Number(raw.prizesWon));
     if (isFinite(p) && p > 0) d.prizesWon = p;
     d.muted = !!raw.muted;
@@ -210,9 +213,9 @@
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
   }
-  // Merk: appen skriver aldri til lagringen bare fordi den åpnes. Klemmingen
-  // over gjelder det appen viser, ikke det som ligger på telefonen — ellers
-  // ville et besøk med lavere GOAL slettet stjerner for godt.
+  // Merk: appen skriver aldri til lagringen bare fordi den åpnes, og state
+  // holder alltid det tallet som faktisk står på telefonen. Det er bare
+  // visningen som begrenses til GOAL — se vist() i paint().
 
   // ---- Lyd ----
   var actx = null;
@@ -309,16 +312,19 @@
   var lastGive = 0;
 
   function paint() {
+    // Har telefonen flere stjerner enn dagens GOAL (fordi målet er senket),
+    // viser vi GOAL — men rører ikke tallet som er lagret.
+    var vist = Math.min(state.stars, GOAL);
     // stjerner
     var sg = "";
-    for (var i = 0; i < GOAL; i++) sg += starSvg(i < state.stars, i === justEarned);
+    for (var i = 0; i < GOAL; i++) sg += starSvg(i < vist, i === justEarned);
     els.starGrid.innerHTML = sg;
     // teller
     // Synlig tekst er kort; den som hører den trenger hele setningen.
-    var synlig = state.stars === GOAL ? "Alle " + GOAL + "! 🎉" : state.stars + " av " + GOAL;
-    var lest = state.stars === GOAL
+    var synlig = vist === GOAL ? "Alle " + GOAL + "! 🎉" : vist + " av " + GOAL;
+    var lest = vist === GOAL
       ? "Alle " + GOAL + " stjerner samlet! Treet blomstrer."
-      : state.stars + " av " + GOAL + " stjerner";
+      : vist + " av " + GOAL + " stjerner";
     // Bare skriv om når noe faktisk er endret, ellers leses telleren opp på
     // nytt hver gang paint() kjøres av noe annet, f.eks. lyd av/på.
     if (els.count.getAttribute("data-lest") !== lest) {
@@ -328,14 +334,14 @@
     }
     // tre — stammen vokser for hver stjerne
     var t = "";
-    for (var c = 0; c < state.stars; c++) {
-      var anim = (c === state.stars - 1) ? ' style="animation:dropIn .4s ease both"' : '';
+    for (var c = 0; c < vist; c++) {
+      var anim = (c === vist - 1) ? ' style="animation:dropIn .4s ease both"' : '';
       t += '<div class="ring"' + anim + '>'
          + (c === 2 || c === 5 ? '<span class="leaf l"></span><span class="leaf r"></span>' : '')
          + '</div>';
     }
-    if (state.stars > 0) {
-      var bloom = state.stars >= GOAL;
+    if (vist > 0) {
+      var bloom = vist >= GOAL;
       t += '<div class="crown' + (bloom ? ' bloom' : '') + '">'
          + '<div class="blob b2"></div><div class="blob b3"></div>'
          + '<div class="blob b4"></div><div class="blob b5"></div><div class="blob b1"></div>'
@@ -348,19 +354,19 @@
     }
     els.tree.innerHTML = t;
     // premie
-    els.prizeBox.className = "prizeBox" + (state.stars >= GOAL ? " won" : "");
+    els.prizeBox.className = "prizeBox" + (vist >= GOAL ? " won" : "");
     // knapp / lyd
     els.giveBtn.disabled = state.stars >= GOAL;
     els.soundBtn.textContent = state.muted ? "🔇" : "🔊";
-    els.soundBtn.setAttribute("aria-pressed", state.muted ? "true" : "false");
-    els.soundBtn.setAttribute("aria-label", state.muted ? "Lyd av" : "Lyd på");
+    els.soundBtn.setAttribute("aria-label", state.muted ? "Slå lyden på" : "Slå lyden av");
     // voksen-panel
     els.prizesWon.textContent = state.prizesWon + " 🦄";
-    els.roundCount.textContent = state.stars + " / " + GOAL;
+    els.roundCount.textContent = vist + " / " + GOAL;
     els.undoBtn.disabled = state.stars === 0;
     var ll = "";
-    for (var k = 0; k < state.log.length; k++) {
-      var dd = new Date(state.log[k]).toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" });
+    var logg = state.log.length > vist ? state.log.slice(state.log.length - vist) : state.log;
+    for (var k = 0; k < logg.length; k++) {
+      var dd = new Date(logg[k]).toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" });
       ll += '<span class="logItem">🌟 ' + dd + '</span>';
     }
     els.logList.innerHTML = ll;
@@ -382,7 +388,28 @@
     }
   }
 
-  function showOverlay() { els.overlay.classList.add("show"); confetti(); }
+  function showOverlay() {
+    els.overlay.classList.add("show");
+    confetti();
+    var b = document.getElementById("newRoundBtn");
+    if (b) b.focus();
+  }
+
+  // Feiringen skal kunne lukkes uten å starte ny runde. Før var «Start ny
+  // runde» den eneste nåbare knappen, og den nullstiller tavla — så den som
+  // bare ville se på treet, måtte slette det.
+  function hideOverlay() {
+    if (!els.overlay.classList.contains("show")) return;
+    els.overlay.classList.remove("show");
+    els.giveBtn.focus();
+  }
+  document.getElementById("lukkBtn").addEventListener("click", hideOverlay);
+  els.overlay.addEventListener("click", function (e) {
+    if (e.target === els.overlay) hideOverlay();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" || e.key === "Esc") hideOverlay();
+  });
 
   function give() {
     if (state.stars >= GOAL) return;
@@ -447,6 +474,7 @@
     if (!window.confirm("Hente inn " + hva + "?\n\nDet som ligger her nå blir borte.")) return;
     state = ny;
     justEarned = -1;
+    lastGive = 0;
     save();
     paint();
     els.importField.value = "";
@@ -466,7 +494,7 @@
     els.overlay.classList.remove("show");
   });
   document.getElementById("newRoundBtn").addEventListener("click", function () {
-    state.prizesWon++; state.stars = 0; state.log = []; justEarned = -1; save(); paint();
+    state.prizesWon++; state.stars = 0; state.log = []; justEarned = -1; lastGive = 0; save(); paint();
     els.overlay.classList.remove("show");
   });
   document.getElementById("grownupToggle").addEventListener("click", function () {
