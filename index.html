@@ -41,20 +41,42 @@
   .scene { position: relative; height: 244px; margin: 0 14px 18px; border-radius: 18px; overflow: hidden; background: linear-gradient(#E3D3F5, #F4ECFB); border: 3px solid #ECDDF7; }
   .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: linear-gradient(#8FCB72, #5FA049); }
   .tree { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); transform-origin: 50% 100%; display: flex; flex-direction: column-reverse; align-items: center; }
-  .ring { width: 22px; height: var(--ringH, 14px); background: linear-gradient(#A9763F, #7E5530);
-    border-top: 1.5px solid rgba(60,46,30,.3); box-shadow: inset 0 0 0 1px rgba(60,46,30,.08); border-radius: 4px; position: relative; }
-  .leaf { position: absolute; top: 3px; width: 12px; height: 8px; background: #6BC98F; border-radius: 0 70% 0 70%; }
-  .leaf.l { left: -10px; transform: scaleX(-1); }
-  .leaf.r { right: -10px; }
+  /* Stammen var stablede skiver med synlig topplinje og avrundede hjørner —
+     den leste som en larve. Nå er hvert ledd rett i kantene og skjøtene er
+     bare en svak strek, så stammen henger sammen som ved. */
+  .ring { width: 21px; height: var(--ringH, 14px); position: relative;
+    background: linear-gradient(90deg, #7E5530 0 3px, #A9763F 3px 14px, #8C6238 14px 100%);
+    box-shadow: inset 0 -1px 0 rgba(60,46,30,.16); }
+  .tree .ring:first-child { border-radius: 0 0 6px 6px; }
+  /* Bladene var 12x8px og forsvant som grønne flekker. Nå store nok til å ses,
+     med en midtnerve og en svak vaiing. */
+  .leaf { position: absolute; top: -2px; width: 22px; height: 13px; background: #5FBF87;
+    border-radius: 0 100% 0 100%; box-shadow: inset -2px -2px 0 rgba(30,90,65,.18);
+    transform-origin: 0% 50%; animation: vai 3.4s ease-in-out infinite; }
+  .leaf::after { content: ""; position: absolute; left: 3px; top: 6px; width: 14px; height: 1.5px;
+    background: rgba(255,255,255,.4); border-radius: 1px; transform: rotate(-12deg); }
+  .leaf.l { left: -20px; transform-origin: 100% 50%; animation-name: vaiVenstre; animation-delay: -1.7s; }
+  .leaf.r { right: -20px; }
   .crown { position: relative; width: 104px; height: 66px; }
-  .blob { position: absolute; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8FE0B5, #4FAE86); box-shadow: inset -3px -4px 6px rgba(40,110,80,.35); }
+  /* Kronen var fem løse baller med hver sin gradient. Nå er de samlet under én
+     felles farge med en lysere topp, så de leser som ett løvverk. */
+  .blob { position: absolute; border-radius: 50%; background: #4FAE86; box-shadow: 0 0 0 3px #4FAE86; }
+  .crown::before { content: ""; position: absolute; left: 4px; top: 2px; right: 4px; bottom: 14px;
+    border-radius: 50%; background: #5FBF92; z-index: 2; }
+  .crown::after { content: ""; position: absolute; left: 16px; top: 6px; width: 40px; height: 22px;
+    border-radius: 50%; background: #7FD6AA; z-index: 3; opacity: .85; }
   .b1 { width: 46px; height: 46px; left: 29px; top: 18px; }
   .b2 { width: 40px; height: 40px; left: 6px; top: 24px; }
   .b3 { width: 40px; height: 40px; left: 58px; top: 24px; }
   .b4 { width: 36px; height: 36px; left: 22px; top: 2px; }
   .b5 { width: 36px; height: 36px; left: 46px; top: 4px; }
-  .blossom { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #FF9ECF; box-shadow: 0 0 0 2px #FFC9E6; }
-  .crown.bloom .blob { background: radial-gradient(circle at 35% 30%, #A6F0C9, #5BC698); }
+  /* Blomstene var rosa prikker. Nå fem kronblad rundt et gult hjerte, tegnet
+     som SVG — kronbladene fløt sammen til en klatt med CSS-gradienter. */
+  .blossom { position: absolute; z-index: 4; line-height: 0;
+    animation: blomstre .5s cubic-bezier(.3,1.6,.5,1) both; }
+  .crown.bloom .blob { background: #5BC698; box-shadow: 0 0 0 3px #5BC698; }
+  .crown.bloom::before { background: #6FD3A4; }
+  .crown.bloom::after { background: #96E8C0; }
   .crown.bloom { animation: sparkleGlow 1.6s ease-in-out infinite; }
   .treeStar { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 22px; }
   .sceneUnicorn { position: absolute; left: 8px; bottom: 22px; }
@@ -108,6 +130,9 @@
   @keyframes fall { from{transform:translateY(-10vh) rotate(0)} to{transform:translateY(110vh) rotate(360deg)} }
   @keyframes dropIn { from{transform:translateY(-26px);opacity:0} to{transform:translateY(0);opacity:1} }
   @keyframes twinkle { 0%,100%{opacity:1} 50%{opacity:.2} }
+  @keyframes vai { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(5deg)} }
+  @keyframes vaiVenstre { 0%,100%{transform:scaleX(-1) rotate(-4deg)} 50%{transform:scaleX(-1) rotate(5deg)} }
+  @keyframes blomstre { from{transform:scale(0) rotate(-60deg)} to{transform:scale(1) rotate(0)} }
   @keyframes sparkleGlow { 0%,100%{filter:drop-shadow(0 0 6px rgba(255,210,120,.5))} 50%{filter:drop-shadow(0 0 16px rgba(255,210,120,.95))} }
   button:focus-visible { outline: 4px solid #7E57C2; outline-offset: 3px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
@@ -308,6 +333,15 @@
       + '</svg>';
   }
 
+  // Blomst: fem kronblad rundt et gult hjerte.
+  var KRONBLAD = '<circle cx=\"10.0\" cy=\"5.4\" r=\"3.6\"/><circle cx=\"14.4\" cy=\"8.6\" r=\"3.6\"/><circle cx=\"12.7\" cy=\"13.7\" r=\"3.6\"/><circle cx=\"7.3\" cy=\"13.7\" r=\"3.6\"/><circle cx=\"5.6\" cy=\"8.6\" r=\"3.6\"/>';
+  function blomst(x, y) {
+    return '<span class="blossom" style="left:' + x + 'px;top:' + y + 'px">'
+      + '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">'
+      + '<g fill="#FFC9E6">' + KRONBLAD + '</g>'
+      + '<circle cx="10" cy="10" r="3" fill="#FFD23F"/></svg></span>';
+  }
+
   var STAR = "M12 1.6l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.4 5.8 20.6 7 13.7 2 8.8l6.9-1z";
   function starSvg(filled, pop) {
     return '<svg class="star'+(pop?' pop':'')+'" width="44" height="44" viewBox="0 0 24 24" '
@@ -389,10 +423,7 @@
       t += '<div class="crown' + (bloom ? ' bloom' : '') + '">'
          + '<div class="blob b2"></div><div class="blob b3"></div>'
          + '<div class="blob b4"></div><div class="blob b5"></div><div class="blob b1"></div>'
-         + (bloom ? '<div class="blossom" style="left:18px;top:30px"></div>'
-                  + '<div class="blossom" style="left:70px;top:30px"></div>'
-                  + '<div class="blossom" style="left:46px;top:14px"></div>'
-                  + '<div class="blossom" style="left:40px;top:44px"></div>' : '')
+         + (bloom ? blomst(16, 30) + blomst(68, 30) + blomst(44, 12) + blomst(38, 44) : '')
          + '<div class="treeStar">' + (bloom ? '🌟' : '✨') + '</div>'
          + '</div>';
     }
