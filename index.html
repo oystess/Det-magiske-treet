@@ -14,7 +14,6 @@
 <link rel="icon" href="icon-192.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
-<!-- Enhjørning-illustrasjon: Twemoji (Twitter / jdecked), lisens CC-BY 4.0 -->
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; }
@@ -58,7 +57,9 @@
   .crown.bloom .blob { background: radial-gradient(circle at 35% 30%, #A6F0C9, #5BC698); }
   .crown.bloom { animation: sparkleGlow 1.6s ease-in-out infinite; }
   .treeStar { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 22px; }
-  .sceneUnicorn { position: absolute; left: 8px; bottom: 30px; }
+  .sceneUnicorn { position: absolute; left: 8px; bottom: 22px; }
+  /* 22px, ikke 30: hovene ligger på y=92 av 100 i SVG-en, så 8 % av høyden er
+     tom plass under dem. Uten fradraget svever enhjørningen over gresset. */
   .prizeWrap { position: absolute; top: 8px; right: 8px; text-align: center; }
   .prizeLabel { font-size: 12px; font-weight: 800; color: #6E4A8C; margin-bottom: 2px; font-family: Fredoka, sans-serif; }
   .prizeBox { width: 60px; height: 52px; background: rgba(251,244,255,.85); border: 3px dashed #9B6FD0; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
@@ -257,11 +258,54 @@
   }
   function winSound() { if (state.muted) return; [659,784,988,1319].forEach(function(f,i){ tone(f,i*0.14,0.24,0.13,"triangle"); }); }
 
-  // ---- Enhjørning (Twemoji, CC-BY 4.0) ----
-  var UNI_PATHS = '<path fill="#C1CDD5" d="M36 19.854C33.518 9.923 25.006 1.909 16.031 6.832c0 0-4.522-1.496-5.174-1.948-.635-.44-1.635-.904-.912.436.423.782.875 1.672 2.403 3.317C8 12.958 9.279 18.262 7.743 21.75c-1.304 2.962-2.577 4.733-1.31 6.976 1.317 2.33 4.729 3.462 7.018 1.06 1.244-1.307.471-1.937 3.132-4.202 2.723-.543 4.394-1.791 4.394-4.375 0 0 .795-.382 1.826 6.009.456 2.818-.157 5.632-.039 8.783H36V19.854z"/><path fill="#60379A" d="M31.906 6.062c.531 1.312.848 3.71.595 5.318-.15-3.923-3.188-6.581-4.376-7.193-2.202-1.137-4.372-.979-6.799-.772.111.168.403.814.32 1.547-.479-.875-1.604-1.42-2.333-1.271-1.36.277-2.561.677-3.475 1.156-.504.102-1.249.413-2.372 1.101-1.911 1.171-4.175 4.338-6.737 3.511 1.042 2.5 3.631 1.845 3.631 1.845 1.207-1.95 4.067-3.779 6.168-4.452 7.619-1.745 12.614 3.439 15.431 9.398.768 1.625 2.611 7.132 4.041 10.292V10.956c-.749-1.038-1.281-3.018-4.094-4.894z"/><path fill="#C1CDD5" d="M13.789 3.662c.573.788 3.236.794 4.596 3.82 1.359 3.026-1.943 2.63-3.14 1.23-1.334-1.561-1.931-2.863-2.165-3.992-.124-.596-.451-2.649.709-1.058z"/><path fill="#758795" d="M14.209 4.962c.956.573 2.164 1.515 2.517 2.596.351 1.081-.707.891-1.349-.042-.641-.934-.94-1.975-1.285-2.263-.346-.289.117-.291.117-.291z"/><circle fill="#292F33" cx="15.255" cy="14.565" r=".946"/><path fill="#53626C" d="M8.63 26.877c.119.658-.181 1.263-.67 1.351-.49.089-.984-.372-1.104-1.03-.119-.659.182-1.265.671-1.354.49-.088.984.373 1.103 1.033z"/><path fill="#EE7C0E" d="M13.844 8.124l.003-.002-.005-.007-.016-.014c-.008-.007-.011-.019-.019-.025-.009-.007-.021-.011-.031-.018C12.621 7.078.933-.495.219.219-.51.948 10.443 9.742 11.149 10.28l.011.006.541.439c.008.007.01.018.018.024.013.01.028.015.042.024l.047.038-.009-.016c.565.361 1.427.114 1.979-.592.559-.715.577-1.625.066-2.079z"/><path fill="#C43512" d="M4.677 2.25l.009-.025c-.301-.174-.594-.341-.878-.5-.016.038-.022.069-.041.11-.112.243-.256.484-.429.716-.166.224-.349.424-.541.595-.02.018-.036.026-.056.043.238.22.489.446.745.676.234-.21.456-.449.654-.717.214-.287.395-.589.537-.898zm2.275 2.945c.306-.41.521-.822.66-1.212-.292-.181-.584-.36-.876-.538-.076.298-.247.699-.586 1.152-.31.417-.613.681-.864.845.259.223.52.445.779.665.314-.244.619-.552.887-.912zM9.87 7.32c.365-.49.609-.983.734-1.437l-.906-.586c-.023.296-.172.81-.631 1.425-.412.554-.821.847-1.1.978l.814.671c.381-.256.761-.611 1.089-1.051z"/>';
-  function unicorn(size, live) {
-    var sp = live ? '<path d="M2.5 2.5 l0.7 1.9 1.9 0.7 -1.9 0.7 -0.7 1.9 -0.7 -1.9 -1.9 -0.7 1.9 -0.7 z" fill="#FFF3C0" stroke="#F5C84B" stroke-width=".3" style="transform-origin:2.5px 2.5px; animation:twinkle 1.2s ease-in-out infinite"/>' : '';
-    return '<svg class="uni" width="'+size+'" height="'+size+'" viewBox="-2 -2 40 40" aria-hidden="true">' + UNI_PATHS + sp + '</svg>';
+  // ---- Enhjørning ----
+  // Profil, vendt mot HØYRE — mot treet. viewBox 0 0 100 100, bakken på y=92,
+  // som er samme punkt som .uni sin transform-origin, så den roterer om hovene.
+  // Kroppen har kontur: uten den forsvinner den mot premieboksen og
+  // seiersoverlegget, som begge er #FBF4FF — nøyaktig kroppens farge.
+  var UNI_L = "#CDB3E6";
+  var UNI_DELER =
+      '<ellipse cx="30" cy="70" rx="5" ry="14"/>'
+    + '<ellipse cx="56" cy="70" rx="5" ry="14"/>'
+    + '<ellipse cx="42" cy="58" rx="25" ry="16"/>'
+    + '<path d="M50 56 C52 42 57 31 68 31 L77 46 C68 55 57 58 50 56 Z"/>'
+    + '<ellipse cx="74" cy="31" rx="16" ry="14"/>'
+    + '<ellipse cx="87" cy="39" rx="9" ry="7.5"/>'
+    + '<path d="M62 20 L59 7 L70 16 Z"/>'
+    + '<ellipse cx="37" cy="74" rx="5.5" ry="15"/>'
+    + '<ellipse cx="63" cy="74" rx="5.5" ry="15"/>';
+
+  function ansikt(u) {
+    var oye = u === "glad"
+        ? '<path d="M73 28 q5 -5 10 0" stroke="#4A2E5E" stroke-width="3" fill="none" stroke-linecap="round"/>'
+      : u === "overrasket"
+        ? '<ellipse cx="78" cy="28" rx="5" ry="5.6" fill="#4A2E5E"/><circle cx="79.8" cy="26" r="2" fill="#fff"/>'
+        : '<ellipse class="oye" cx="78" cy="28" rx="4" ry="4.6" fill="#4A2E5E"/><circle cx="79.5" cy="26.2" r="1.6" fill="#fff"/>';
+    var munn = u === "glad"
+        ? '<path d="M86 42 q4 3.5 7 0.5" stroke="#B48CD8" stroke-width="2.2" fill="none" stroke-linecap="round"/>' : '';
+    var kinn = u === "glad" ? '<ellipse cx="69" cy="39" rx="5" ry="3.4" fill="#FFC9E6"/>' : '';
+    return kinn + oye + munn;
+  }
+
+  function unicorn(size, o) {
+    o = o || {};
+    return '<svg class="uni" width="' + size + '" height="' + size + '" viewBox="0 0 100 100" aria-hidden="true">'
+      + '<path class="hale" d="M24 52 C10 50 4 64 9 78 C13 88 22 88 23 80 C16 72 14 60 25 59 Z" fill="#9B5DE5" stroke="' + UNI_L + '" stroke-width="2.5" stroke-linejoin="round"/>'
+      + '<path class="hale" d="M23 57 C14 57 11 66 14 74 C17 80 21 80 21 76 C17 70 17 63 24 62 Z" fill="#FFB6E1"/>'
+      + '<g stroke="' + UNI_L + '" stroke-width="5" stroke-linejoin="round" fill="' + UNI_L + '">' + UNI_DELER + '</g>'
+      + '<g fill="#FBF4FF">' + UNI_DELER + '</g>'
+      + '<ellipse cx="30" cy="80" rx="5" ry="4" fill="#B48CD8"/><ellipse cx="56" cy="80" rx="5" ry="4" fill="#B48CD8"/>'
+      + '<ellipse cx="37" cy="85" rx="5.5" ry="4.5" fill="#C79DEB"/><ellipse cx="63" cy="85" rx="5.5" ry="4.5" fill="#C79DEB"/>'
+      + '<ellipse cx="42" cy="66" rx="20" ry="7" fill="#F3E9FC"/>'
+      + '<ellipse cx="63" cy="17" rx="4" ry="2.5" fill="#FFC9E6"/>'
+      + '<ellipse cx="90" cy="37" rx="1.9" ry="1.5" fill="#C9A6E6"/>'
+      + '<path d="M70 19 L77 1 L79 20 Z" fill="#FFD23F" stroke="' + UNI_L + '" stroke-width="2" stroke-linejoin="round"/>'
+      + '<path d="M72 15 L77.5 8 M71.5 19 L78.5 15" stroke="#E8A100" stroke-width="1.5" stroke-linecap="round"/>'
+      + '<path class="man" d="M68 14 C56 19 51 33 54 48 C55 55 61 55 61 49 C57 37 59 24 70 20 Z" fill="#9B5DE5" stroke="' + UNI_L + '" stroke-width="2" stroke-linejoin="round"/>'
+      + '<path class="man" d="M69 18 C59 23 55 34 57 45 C58 38 59 28 70 24 Z" fill="#C79DEB"/>'
+      + '<path class="man" d="M67 22 C60 27 58 36 59 44 C60 37 61 31 68 27 Z" fill="#FFB6E1"/>'
+      + ansikt(o.uttrykk || "ro")
+      + '</svg>';
   }
 
   var STAR = "M12 1.6l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.4 5.8 20.6 7 13.7 2 8.8l6.9-1z";
@@ -272,10 +316,10 @@
   }
 
   // ---- Faste elementer ----
-  document.getElementById("headUni").innerHTML = unicorn(50, false);
-  document.getElementById("sceneUni").innerHTML = unicorn(96, true);
-  document.getElementById("overlayUni").innerHTML = unicorn(128, false);
-  document.getElementById("prizeBox").innerHTML = unicorn(46, false);
+  document.getElementById("headUni").innerHTML = unicorn(50, {});
+  document.getElementById("sceneUni").innerHTML = unicorn(96, {});
+  document.getElementById("overlayUni").innerHTML = unicorn(128, { uttrykk: "glad" });
+  document.getElementById("prizeBox").innerHTML = unicorn(46, {});
 
   var els = {
     starGrid: document.getElementById("starGrid"),
