@@ -40,6 +40,16 @@
   .count { text-align: center; font-family: Fredoka, sans-serif; font-weight: 700; font-size: 30px; color: #9B5DE5; margin: 2px 0 12px; }
   .scene { position: relative; height: 244px; margin: 0 14px 18px; border-radius: 18px; overflow: hidden; background: linear-gradient(#E3D3F5, #F4ECFB); border: 3px solid #ECDDF7; }
   .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: linear-gradient(#8FCB72, #5FA049); }
+  /* Bakken var en flat stripe. Tustene bryter kanten, så den leser som eng
+     framfor gulv. Gjentatte lineære gradienter ga rette staver — et
+     stakittgjerde — så kanten er tegnet som SVG i stedet. */
+  .gress { position: absolute; left: 0; right: 0; bottom: 34px; height: 11px; line-height: 0; }
+  .gress svg { width: 100%; height: 100%; display: block; }
+  .ikon { display: block; }
+  .logItem svg, .grownupRow svg, .subtitle svg, .bigBtn svg, .savedNote svg { vertical-align: -.18em; display: inline-block; }
+  .stein { position: absolute; bottom: 6px; right: 26px; width: 17px; height: 10px;
+    background: #C4B7D6; border-radius: 9px 9px 3px 3px; box-shadow: inset -2px -2px 0 rgba(90,70,120,.18); }
+  .engblomst { position: absolute; bottom: 20px; line-height: 0; }
   .tree { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); transform-origin: 50% 100%; display: flex; flex-direction: column-reverse; align-items: center; }
   /* Stammen var stablede skiver med synlig topplinje og avrundede hjørner —
      den leste som en larve. Nå er hvert ledd rett i kantene og skjøtene er
@@ -146,9 +156,9 @@
       <span id="headUni"></span>
       <div style="flex:1; min-width:0;">
         <h1 class="title">Selmas magiske tre</h1>
-        <p class="subtitle">Lagt seg i tide = 1 stjerne 🌟</p>
+        <p class="subtitle">Lagt seg i tide = 1 stjerne <span id="subStar"></span></p>
       </div>
-      <button class="soundBtn" id="soundBtn" aria-label="Slå lyden av">🔊</button>
+      <button class="soundBtn" id="soundBtn" aria-label="Slå lyden av"></button>
     </div>
   </div>
 
@@ -157,6 +167,10 @@
 
   <div class="scene">
     <div class="ground"></div>
+    <div class="gress" id="gress"></div>
+    <div class="stein"></div>
+    <div class="engblomst" id="eng1" style="left:112px"></div>
+    <div class="engblomst" id="eng2" style="left:250px"></div>
     <div class="prizeWrap">
       <div class="prizeLabel">Premie</div>
       <div class="prizeBox" id="prizeBox"></div>
@@ -165,17 +179,17 @@
     <div class="sceneUnicorn" id="sceneUni"></div>
   </div>
 
-  <button class="bigBtn" id="giveBtn">Gi en stjerne 🌟</button>
+  <button class="bigBtn" id="giveBtn">Gi en stjerne <span id="btnStar"></span></button>
   <button class="grownupToggle" id="grownupToggle">For mamma og pappa ▼</button>
   <div class="grownupBox" id="grownupBox" style="display:none;">
-    <div class="grownupRow"><span>Premier vunnet</span><strong id="prizesWon">0 🦄</strong></div>
+    <div class="grownupRow"><span>Premier vunnet</span><strong id="prizesWon">0</strong></div>
     <div class="grownupRow"><span>Stjerner denne runden</span><strong id="roundCount">0 / 10</strong></div>
     <div class="logList" id="logList"></div>
     <div class="btnRow">
       <button class="smallBtn" id="undoBtn">Angre siste</button>
       <button class="smallBtn reset" id="resetBtn">Nullstill runde</button>
     </div>
-    <p class="savedNote">Fremdriften lagres automatisk ✓</p>
+    <p class="savedNote">Fremdriften lagres automatisk <span id="lagretHake"></span></p>
     <details class="backup">
       <summary>Sikkerhetskopi og flytting</summary>
       <p class="backupHelp">Stjernene ligger bare på denne telefonen. Kopier koden
@@ -193,11 +207,11 @@
 
 <div class="overlay" id="overlay">
   <div class="overlayCard" role="dialog" aria-modal="true" aria-labelledby="hurra">
-    <button class="lukkBtn" id="lukkBtn" aria-label="Lukk">✕</button>
+    <button class="lukkBtn" id="lukkBtn" aria-label="Lukk"></button>
     <div class="wiggle" id="overlayUni"></div>
     <h2 class="hurra" id="hurra">HURRA, SELMA!</h2>
-    <p class="wonText">Du fikk det magiske treet til å blomstre med <strong>10 stjerner</strong> 🌟</p>
-    <p class="wonText">Du har vunnet en enhjørning! 🦄</p>
+    <p class="wonText">Du fikk det magiske treet til å blomstre med <strong>10 stjerner</strong> <span id="wonStar"></span></p>
+    <p class="wonText">Du har vunnet en enhjørning! <span id="wonUni"></span></p>
     <button class="bigBtn" id="newRoundBtn">Start ny runde</button>
   </div>
 </div>
@@ -335,18 +349,45 @@
 
   // Blomst: fem kronblad rundt et gult hjerte.
   var KRONBLAD = '<circle cx=\"10.0\" cy=\"5.4\" r=\"3.6\"/><circle cx=\"14.4\" cy=\"8.6\" r=\"3.6\"/><circle cx=\"12.7\" cy=\"13.7\" r=\"3.6\"/><circle cx=\"7.3\" cy=\"13.7\" r=\"3.6\"/><circle cx=\"5.6\" cy=\"8.6\" r=\"3.6\"/>';
+  function blomstSvg(str, kron, hjerte) {
+    return '<svg width="' + str + '" height="' + str + '" viewBox="0 0 20 20" aria-hidden="true">'
+      + '<g fill="' + (kron || "#FFC9E6") + '">' + KRONBLAD + '</g>'
+      + '<circle cx="10" cy="10" r="3" fill="' + (hjerte || "#FFD23F") + '"/></svg>';
+  }
   function blomst(x, y) {
-    return '<span class="blossom" style="left:' + x + 'px;top:' + y + 'px">'
-      + '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">'
-      + '<g fill="#FFC9E6">' + KRONBLAD + '</g>'
-      + '<circle cx="10" cy="10" r="3" fill="#FFD23F"/></svg></span>';
+    return '<span class="blossom" style="left:' + x + 'px;top:' + y + 'px">' + blomstSvg(20) + '</span>';
   }
 
+  function ikon(d, farge, str, ekstra) {
+    return '<svg class="ikon" width="' + (str || 22) + '" height="' + (str || 22) + '" viewBox="0 0 24 24" aria-hidden="true">'
+      + (ekstra || '') + '<path d="' + d + '" fill="' + (farge || "#4A2E5E") + '"/></svg>';
+  }
+  var D_LYD_PA = "M4 9v6h4l5 4V5L8 9H4z";
+  var D_BOLGE  = "M15.5 8.5a5 5 0 010 7 1 1 0 001.4 1.4 7 7 0 000-9.8 1 1 0 00-1.4 1.4z";
+  var D_KRYSS  = "M6.6 5.2 12 10.6l5.4-5.4 1.4 1.4L13.4 12l5.4 5.4-1.4 1.4L12 13.4l-5.4 5.4-1.4-1.4L10.6 12 5.2 6.6z";
+  var D_HAKE   = "M9.6 17.6 4.4 12.4l1.5-1.5 3.7 3.7 8.5-8.5 1.5 1.5z";
+  var D_STRIPE = "M4.2 18.4 17.8 4.8l1.4 1.4L5.6 19.8z";
+
   var STAR = "M12 1.6l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.4 5.8 20.6 7 13.7 2 8.8l6.9-1z";
+  // Tomme stjerner sover, fylte er våkne. Forskjellen skal ses på
+  // armlengdes avstand, ikke bare i fargen.
+  // Gullstjerne uten ansikt — brukes i tittel, knapp, logg og på treet.
+  function gullstjerne(str) {
+    return '<svg width="' + str + '" height="' + str + '" viewBox="0 0 24 24" aria-hidden="true">'
+      + '<path d="' + STAR + '" fill="#FFD23F" stroke="#E8A100" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+  }
+
   function starSvg(filled, pop) {
-    return '<svg class="star'+(pop?' pop':'')+'" width="44" height="44" viewBox="0 0 24 24" '
+    var ansikt = filled
+      ? '<path d="M9.8 11.2q.9-.9 1.8 0M14 11.2q.9-.9 1.8 0" stroke="#8A5E00" stroke-width="1" fill="none" stroke-linecap="round"/>'
+        + '<path d="M10.9 14.4q1.1 1.1 2.2 0" stroke="#8A5E00" stroke-width="1.1" fill="none" stroke-linecap="round"/>'
+        + '<ellipse cx="8.7" cy="13.6" rx="1.2" ry=".8" fill="#FF9ECF" opacity=".75"/>'
+        + '<ellipse cx="15.3" cy="13.6" rx="1.2" ry=".8" fill="#FF9ECF" opacity=".75"/>'
+      : '<path d="M9.6 12.2h2M13.4 12.2h2" stroke="#B9A3D2" stroke-width="1" stroke-linecap="round"/>';
+    return '<svg class="star'+(pop?' pop':'')+'" width="44" height="44" viewBox="0 0 24 24" aria-hidden="true" '
       + 'style="'+(filled?'filter:drop-shadow(0 3px 4px rgba(155,93,229,.45))':'')+'">'
-      + '<path d="'+STAR+'" fill="'+(filled?'#FFD23F':'#EADBF5')+'" stroke="'+(filled?'#E8A100':'#CBB7E0')+'" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+      + '<path d="'+STAR+'" fill="'+(filled?'#FFD23F':'#EADBF5')+'" stroke="'+(filled?'#E8A100':'#CBB7E0')+'" stroke-width="1.4" stroke-linejoin="round"/>'
+      + ansikt + '</svg>';
   }
 
   // ---- Faste elementer ----
@@ -354,6 +395,17 @@
   document.getElementById("sceneUni").innerHTML = unicorn(96, {});
   document.getElementById("overlayUni").innerHTML = unicorn(128, { uttrykk: "glad" });
   document.getElementById("prizeBox").innerHTML = unicorn(46, {});
+  document.getElementById("gress").innerHTML =
+      '<svg viewBox="0 0 360 12" preserveAspectRatio="none" aria-hidden="true">'
+    + '<path d="M0 12 L4 9 L8 12 L11 8 L15 12 L18 9 L22 12 L25 9 L29 12 L32 7 L36 12 L41 9 L46 12 L49 8 L53 12 L56 7 L60 12 L63 8 L67 12 L71 9 L75 12 L80 10 L85 12 L89 10 L93 12 L97 10 L101 12 L106 6 L111 12 L114 8 L118 12 L122 6 L126 12 L130 9 L134 12 L137 9 L141 12 L144 9 L148 12 L153 7 L158 12 L162 8 L167 12 L172 5 L177 12 L181 9 L186 12 L190 7 L194 12 L197 7 L201 12 L206 6 L211 12 L216 9 L221 12 L224 6 L228 12 L233 9 L238 12 L242 8 L247 12 L252 8 L257 12 L260 8 L264 12 L268 9 L273 12 L277 9 L282 12 L287 5 L292 12 L295 9 L299 12 L304 6 L309 12 L312 9 L316 12 L321 6 L326 12 L331 6 L336 12 L339 9 L343 12 L347 5 L352 12 L355 8 L359 12 L362 5 L366 12 L360 12 Z" fill="#8FCB72"/></svg>';
+  document.getElementById("subStar").innerHTML = gullstjerne(17);
+  document.getElementById("wonStar").innerHTML = gullstjerne(20);
+  document.getElementById("wonUni").innerHTML = unicorn(26, { uttrykk: "glad" });
+  document.getElementById("btnStar").innerHTML = gullstjerne(26);
+  document.getElementById("lagretHake").innerHTML = ikon(D_HAKE, "#2A7150", 15);
+  document.getElementById("lukkBtn").innerHTML = ikon(D_KRYSS, "#4A2E5E", 20);
+  document.getElementById("eng1").innerHTML = blomstSvg(14, "#FFC2E2", "#FFD23F");
+  document.getElementById("eng2").innerHTML = blomstSvg(12, "#FBF4FF", "#FFD23F");
 
   var els = {
     starGrid: document.getElementById("starGrid"),
@@ -399,7 +451,7 @@
     els.starGrid.innerHTML = sg;
     // teller
     // Synlig tekst er kort; den som hører den trenger hele setningen.
-    var synlig = vist === GOAL ? "Alle " + GOAL + "! 🎉" : vist + " av " + GOAL;
+    var synlig = vist === GOAL ? "Alle " + GOAL + "! " + gullstjerne(26) : vist + " av " + GOAL;
     var lest = vist === GOAL
       ? "Alle " + GOAL + " stjerner samlet! Treet blomstrer."
       : vist + " av " + GOAL + " stjerner";
@@ -424,7 +476,7 @@
          + '<div class="blob b2"></div><div class="blob b3"></div>'
          + '<div class="blob b4"></div><div class="blob b5"></div><div class="blob b1"></div>'
          + (bloom ? blomst(16, 30) + blomst(68, 30) + blomst(44, 12) + blomst(38, 44) : '')
-         + '<div class="treeStar">' + (bloom ? '🌟' : '✨') + '</div>'
+         + '<div class="treeStar">' + gullstjerne(bloom ? 24 : 17) + '</div>'
          + '</div>';
     }
     els.tree.innerHTML = t;
@@ -432,29 +484,41 @@
     els.prizeBox.className = "prizeBox" + (vist >= GOAL ? " won" : "");
     // knapp / lyd
     els.giveBtn.disabled = state.stars >= GOAL;
-    els.soundBtn.textContent = state.muted ? "🔇" : "🔊";
+    els.soundBtn.innerHTML = ikon(D_LYD_PA, "#4A2E5E", 24,
+      state.muted ? '<path d="' + D_STRIPE + '" fill="#B04575"/>'
+                  : '<path d="' + D_BOLGE + '" fill="#4A2E5E"/>');
     els.soundBtn.setAttribute("aria-label", state.muted ? "Slå lyden på" : "Slå lyden av");
     // voksen-panel
-    els.prizesWon.textContent = state.prizesWon + " 🦄";
+    els.prizesWon.innerHTML = state.prizesWon + " " + unicorn(24, {});
     els.roundCount.textContent = vist + " / " + GOAL;
     els.undoBtn.disabled = state.stars === 0;
     var ll = "";
     var logg = state.log.length > vist ? state.log.slice(state.log.length - vist) : state.log;
     for (var k = 0; k < logg.length; k++) {
       var dd = new Date(logg[k]).toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" });
-      ll += '<span class="logItem">🌟 ' + dd + '</span>';
+      ll += '<span class="logItem">' + gullstjerne(13) + " " + dd + '</span>';
     }
     els.logList.innerHTML = ll;
     // sikkerhetskopi
     els.exportField.value = JSON.stringify(state);
   }
 
+  // Konfettien slapp systememoji, som telefonen tegner i sin egen stil.
+  // Nå appens egne former: stjerne, blomst, hjerte og prikk.
+  function konfettiBit(i) {
+    if (i % 4 === 0) return '<svg width="22" height="22" viewBox="0 0 24 24"><path d="' + STAR
+      + '" fill="#FFD23F" stroke="#E8A100" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+    if (i % 4 === 1) return blomstSvg(22);
+    if (i % 4 === 2) return '<svg width="20" height="20" viewBox="0 0 24 24">'
+      + '<path d="M12 21C5 16 2 12 2 8.6 2 5.5 4.4 3.4 7.2 3.4c1.8 0 3.6 1 4.8 2.6 1.2-1.6 3-2.6 4.8-2.6C19.6 3.4 22 5.5 22 8.6 22 12 19 16 12 21z" fill="#FF9ECF"/></svg>';
+    return '<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#C79DEB"/></svg>';
+  }
+
   function confetti() {
-    var emoji = ["⭐", "🦄", "🌸", "✨"];
     for (var i = 0; i < 28; i++) {
       var s = document.createElement("span");
       s.className = "confetti";
-      s.textContent = emoji[i % 4];
+      s.innerHTML = konfettiBit(i);
       s.style.left = (Math.random() * 100) + "%";
       s.style.animationDelay = (Math.random() * 0.8) + "s";
       s.style.animationDuration = (1.6 + Math.random() * 1.4) + "s";
@@ -528,7 +592,7 @@
     var tekst = els.exportField.value;
     els.exportField.focus();
     els.exportField.select();
-    function gikkBra() { melding("Kopiert ✓ Lim den inn et trygt sted.", "ok"); }
+    function gikkBra() { melding("Kopiert. Lim den inn et trygt sted.", "ok"); }
     function gikkIkke() { melding("Fikk ikke kopiert. Merk teksten og kopier den selv.", "feil"); }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(tekst).then(gikkBra, function () {
@@ -555,7 +619,7 @@
     els.importField.value = "";
     els.overlay.classList.remove("show");
     if (state.stars >= GOAL) showOverlay();
-    melding("Hentet inn ✓ " + hva + ".", "ok");
+    melding("Hentet inn " + hva + ".", "ok");
   });
 
   els.giveBtn.addEventListener("click", give);

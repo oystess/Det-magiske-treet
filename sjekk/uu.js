@@ -46,7 +46,11 @@ var s = f.suite("uu");
   });
   await p.reload(); await p.waitForTimeout(300);
   s.t("opplest tekst ved mål", await lest(), "Alle 10 stjerner samlet! Treet blomstrer.");
-  s.t("synlig tekst ved mål", await synlig(), "Alle 10! 🎉");
+  // Emojien er byttet ut med en tegnet stjerne, så teksten og figuren testes hver for seg.
+  s.t("synlig tekst ved mål", (await synlig()).trim(), "Alle 10!");
+  s.t("tegnet stjerne ved mål", await p.evaluate(function () {
+    return !!document.querySelector("#count [aria-hidden] svg");
+  }), true);
 
   var k = await p.evaluate(function () {
     function L(c) {
@@ -139,14 +143,17 @@ var s = f.suite("uu");
   // hvilken som helst utgangstilstand — testen over har allerede klikket.
   s.t("lydknappen melder tilstanden sin", await p.evaluate(function () {
     var b = document.getElementById("soundBtn");
-    function les() { return b.getAttribute("aria-label") + "/" + b.textContent; }
-    var a = les(); b.click(); var c = les(); b.click();
-    var gyldig = ["Slå lyden av/🔊", "Slå lyden på/🔇"];
+    var a = b.getAttribute("aria-label"), ai = b.innerHTML;
+    b.click();
+    var c = b.getAttribute("aria-label"), ci = b.innerHTML;
+    b.click();
+    var gyldig = ["Slå lyden av", "Slå lyden på"];
     // Tilstanden skal kodes ett sted. aria-pressed i tillegg til en etikett
     // som skifter gir "Slå lyden av, ikke trykket" — to svar på ett spørsmål.
+    // Ikonet må også endre seg: etiketten alene hjelper ikke den som ser.
     return [gyldig.indexOf(a) >= 0, gyldig.indexOf(c) >= 0, a !== c,
-            b.hasAttribute("aria-pressed")];
-  }), [true, true, true, false]);
+            b.hasAttribute("aria-pressed"), ai !== ci, ai.indexOf("<svg") === 0];
+  }), [true, true, true, false, true, true]);
 
   // maximum-scale=1 er borte (riktig), så alt som trykkes på må selv si fra
   // at dobbelttrykk ikke er zoom.

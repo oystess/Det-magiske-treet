@@ -34,6 +34,18 @@ var mangler = nevnt.filter(function (n) { return sporet.indexOf(n) < 0; });
 s.t("README beskriver bare filer som finnes", mangler, []);
 s.t(".DS_Store er ikke sporet", sporet.indexOf(".DS_Store"), -1);
 
+// Appen skal tegne alle figurene selv. Systememoji rendres av telefonen, så
+// iPhone og Android ville sett ulike ut.
+var emoji = [];
+for (var ci = 0; ci < src.length; ci++) {
+  var o = src.codePointAt(ci);
+  if ((o >= 0x1F300 && o <= 0x1FAFF) || (o >= 0x2600 && o <= 0x27BF) ||
+      o === 0x2B50 || o === 0x2705 || o === 0x2713 || o === 0x2715) {
+    if (emoji.indexOf(src[ci]) < 0) emoji.push(src[ci]);
+  }
+}
+s.t("ingen systememoji i appen", emoji, []);
+
 // --- offline ---
 (async function () {
   var b = await f.start();
