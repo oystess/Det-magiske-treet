@@ -39,14 +39,51 @@ Appen er én frittstående HTML-fil uten avhengigheter. Den lagrer fremgangen lo
 
 ## 💾 Lagring og personvern
 - All fremgang lagres lokalt på telefonen via nettleserens `localStorage` — ingenting sendes til noen server.
-- Dataene ligger på **den telefonen appen brukes på**.
-- «For mamma og pappa»-panelet har **Angre siste** og **Nullstill runde**.
+- Dataene ligger på **den telefonen appen brukes på**, men kan kopieres til en
+  annen telefon med sikkerhetskopien under.
+- «For mamma og pappa»-panelet har **Angre siste**, **Nullstill runde** og
+  **Sikkerhetskopi og flytting**.
+
+### Sikkerhetskopi og flytting
+Under **For mamma og pappa → Sikkerhetskopi og flytting** ligger en kode som
+inneholder hele fremdriften. Den kan brukes til å:
+
+- **ta vare på stjernene** i tilfelle telefonen ryker eller byttes,
+- **flytte tavla** til en ny telefon,
+- **gi den andre forelderen samme tavle** — send koden i en melding.
+
+Kopier koden fra det øverste feltet, og lim den inn i det nederste på den andre
+telefonen. Import **erstatter** det som ligger der fra før, og spør først.
+
+> 💡 Det skjer ingen automatisk sammenslåing. Gir begge foreldrene stjerner hver
+> for seg, er det koden som limes inn sist som gjelder.
 
 ---
 
+## ✅ Sjekker
+
+Repoet har en sjekkesuite som kjører appen i en ekte nettleser:
+
+```bash
+./sjekk/kjor.sh            # alle grupper
+./sjekk/kjor.sh lyd uu     # bare noen
+BEHOLD=1 ./sjekk/kjor.sh   # la Playwright ligge mellom kjøringer
+```
+
+Playwright installeres midlertidig og fjernes etterpå — **appen og repoet
+forblir avhengighetsfrie**. Sjekkene dekker validering av lagrede data,
+dobbelttrykk, eksport/import, lydens tonegang, universell utforming med målt
+kontrast, treets geometri, og at rammene over holder.
+
+Claude Code har også en `kvalitetssikrer`-agent (`.claude/agents/`) som kjører
+suiten, leser diffen mot det commit-meldingene påstår, og rapporterer funn.
+Den rapporterer — den endrer ingenting.
+
 ## 🛠️ Tilpasning
 Alt ligger i `index.html`:
-- **Antall stjerner til premie:** endre `var GOAL = 10;` i `<script>`.
+- **Antall stjerner til premie:** endre `var GOAL = 10;` i `<script>`. Treet og
+  lydens tonegang tilpasser seg tallet av seg selv. Stjerner som allerede er
+  samlet blir liggende urørt, også om du senker tallet og hever det igjen.
 - **Tekst (navn, premie, overskrifter):** søk i HTML-en, f.eks. «Selmas magiske tre» eller «vunnet en enhjørning».
 - **Farger:** justeres i `<style>` (lavendel `#C79DEB`, lilla `#9B5DE5`, løvverk `#4FAE86`).
 - **Lyd:** av/på-knappen øverst til høyre; innstillingen huskes.

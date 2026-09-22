@@ -2,7 +2,7 @@
 <html lang="nb">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Selmas magiske tre</title>
 <meta name="theme-color" content="#C79DEB" />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -35,14 +35,14 @@
   .stripes { height: 10px; background: repeating-linear-gradient(45deg,#FFB6E1 0 14px,#C79DEB 14px 28px); }
   .headerInner { display: flex; align-items: center; gap: 8px; padding: 8px 14px 14px; }
   .title { margin: 0; font-family: Fredoka, sans-serif; font-weight: 700; font-size: 23px; color: #4A2E5E; line-height: 1.05; white-space: nowrap; }
-  .subtitle { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: #6E4A8C; }
-  .soundBtn { flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; border: 2px solid #9B6FD0; background: #FBF4FF; font-size: 20px; cursor: pointer; }
+  .subtitle { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: #513365; }
+  .soundBtn { flex-shrink: 0; touch-action: manipulation; width: 42px; height: 42px; border-radius: 12px; border: 2px solid #9B6FD0; background: #FBF4FF; font-size: 20px; cursor: pointer; }
   .starGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; place-items: center; padding: 18px 14px 4px; }
   .count { text-align: center; font-family: Fredoka, sans-serif; font-weight: 700; font-size: 30px; color: #9B5DE5; margin: 2px 0 12px; }
-  .scene { position: relative; height: 224px; margin: 0 14px 18px; border-radius: 18px; overflow: hidden; background: linear-gradient(#E3D3F5, #F4ECFB); border: 3px solid #ECDDF7; }
+  .scene { position: relative; height: 244px; margin: 0 14px 18px; border-radius: 18px; overflow: hidden; background: linear-gradient(#E3D3F5, #F4ECFB); border: 3px solid #ECDDF7; }
   .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: linear-gradient(#8FCB72, #5FA049); }
-  .tree { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column-reverse; align-items: center; }
-  .ring { width: 22px; height: 14px; background: linear-gradient(#A9763F, #7E5530);
+  .tree { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); transform-origin: 50% 100%; display: flex; flex-direction: column-reverse; align-items: center; }
+  .ring { width: 22px; height: var(--ringH, 14px); background: linear-gradient(#A9763F, #7E5530);
     border-top: 1.5px solid rgba(60,46,30,.3); box-shadow: inset 0 0 0 1px rgba(60,46,30,.08); border-radius: 4px; position: relative; }
   .leaf { position: absolute; top: 3px; width: 12px; height: 8px; background: #6BC98F; border-radius: 0 70% 0 70%; }
   .leaf.l { left: -10px; transform: scaleX(-1); }
@@ -65,24 +65,38 @@
   .prizeBox.won { box-shadow: 0 0 0 4px #FFD23F, 0 8px 18px rgba(155,93,229,.4); }
   .uni { transition: transform .35s ease; transform-origin: 50% 92%; }
   .uni.magic { transform: translateY(-6px) rotate(-3deg); }
-  .bigBtn { display: block; width: calc(100% - 28px); margin: 0 14px 6px; padding: 18px 16px; font-family: Fredoka, sans-serif; font-size: 24px; font-weight: 700; color: #4A2E5E; background: linear-gradient(#FFC2E2, #C79DEB); border: none; border-radius: 18px; box-shadow: 0 6px 0 #9B6FD0, 0 10px 18px rgba(155,93,229,.35); cursor: pointer; }
+  .bigBtn { display: block; touch-action: manipulation; width: calc(100% - 28px); margin: 0 14px 6px; padding: 18px 16px; font-family: Fredoka, sans-serif; font-size: 24px; font-weight: 700; color: #4A2E5E; background: linear-gradient(#FFC2E2, #C79DEB); border: none; border-radius: 18px; box-shadow: 0 6px 0 #9B6FD0, 0 10px 18px rgba(155,93,229,.35); cursor: pointer; }
   .bigBtn:active { transform: translateY(3px); box-shadow: 0 3px 0 #9B6FD0; }
   .bigBtn:disabled { opacity: .5; cursor: default; transform: none; box-shadow: 0 6px 0 #9B6FD0; }
-  .grownupToggle { display: block; margin: 10px auto 14px; padding: 6px 14px; background: transparent; border: none; color: #9079A6; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .grownupToggle { display: block; touch-action: manipulation; margin: 10px auto 14px; padding: 6px 14px; background: transparent; border: none; color: #745C8A; font-weight: 700; font-size: 13px; cursor: pointer; }
   .grownupBox { margin: 0 14px 16px; padding: 14px; background: #F0E6FB; border-radius: 14px; font-size: 14px; color: #5C3D6E; }
   .grownupRow { display: flex; justify-content: space-between; padding: 4px 0; font-weight: 700; }
   .logList { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
   .logItem { background: #fff; border-radius: 8px; padding: 3px 8px; font-size: 12px; font-weight: 700; }
   .btnRow { display: flex; gap: 8px; margin-top: 8px; }
-  .smallBtn { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #9B6FD0; background: #fff; color: #6E4A8C; font-weight: 800; cursor: pointer; }
-  .smallBtn.reset { border-color: #C45B8B; color: #C45B8B; }
+  .smallBtn { flex: 1; touch-action: manipulation; padding: 10px; border-radius: 10px; border: 2px solid #9B6FD0; background: #fff; color: #6E4A8C; font-weight: 800; cursor: pointer; }
+  .smallBtn.reset { border-color: #B04575; color: #B04575; }
   .smallBtn:disabled { opacity: .4; }
-  .savedNote { text-align: center; font-size: 12px; color: #9079A6; margin: 10px 0 0; }
+  .backup { margin-top: 12px; border-top: 2px solid #E0D0F2; padding-top: 10px; }
+  .backup summary { touch-action: manipulation; font-weight: 800; color: #5C3D6E; cursor: pointer; font-size: 13px; }
+  .backupHelp { font-size: 12px; color: #5C3D6E; margin: 8px 0 6px; line-height: 1.4; }
+  .backup textarea { width: 100%; border: 2px solid #C9B2E4; border-radius: 10px; padding: 8px;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 16px; color: #4A2E5E;
+    background: #fff; resize: vertical; -webkit-user-select: text; user-select: text; }
+  .backupMsg { font-size: 12px; font-weight: 700; margin: 8px 0 0; min-height: 16px; }
+  .backupMsg.ok { color: #2A7150; }
+  .backupMsg.feil { color: #B23A6B; }
+  .sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .savedNote { text-align: center; font-size: 12px; color: #745C8A; margin: 10px 0 0; }
   .star { animation: none; }
   .star.pop { animation: pop .5s both; }
   .overlay { position: fixed; inset: 0; background: rgba(60,40,80,.55); display: none; align-items: center; justify-content: center; padding: 16px; overflow: hidden; z-index: 50; }
   .overlay.show { display: flex; }
-  .overlayCard { background: #FBF4FF; border-radius: 24px; padding: 26px 22px; text-align: center; max-width: 360px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.3); border: 4px solid #FFD23F; z-index: 2; }
+  .lukkBtn { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px;
+    border-radius: 12px; border: 2px solid #9B6FD0; background: #FBF4FF; color: #4A2E5E;
+    font-size: 20px; font-weight: 800; line-height: 1; cursor: pointer; touch-action: manipulation; }
+  .overlayCard { position: relative; background: #FBF4FF; border-radius: 24px; padding: 26px 22px; text-align: center; max-width: 360px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.3); border: 4px solid #FFD23F; z-index: 2; }
   .overlayCard .uni { display: inline-block; }
   .hurra { font-family: Fredoka, sans-serif; font-weight: 700; font-size: 30px; color: #9B5DE5; margin: 6px 0; }
   .wonText { font-size: 17px; font-weight: 700; color: #5C3D6E; margin: 4px 0; }
@@ -108,12 +122,12 @@
         <h1 class="title">Selmas magiske tre</h1>
         <p class="subtitle">Lagt seg i tide = 1 stjerne 🌟</p>
       </div>
-      <button class="soundBtn" id="soundBtn" aria-label="Lyd">🔊</button>
+      <button class="soundBtn" id="soundBtn" aria-label="Slå lyden av">🔊</button>
     </div>
   </div>
 
-  <div class="starGrid" id="starGrid"></div>
-  <div class="count" id="count"></div>
+  <div class="starGrid" id="starGrid" aria-hidden="true"></div>
+  <div class="count" id="count" role="status" aria-live="polite"></div>
 
   <div class="scene">
     <div class="ground"></div>
@@ -121,7 +135,7 @@
       <div class="prizeLabel">Premie</div>
       <div class="prizeBox" id="prizeBox"></div>
     </div>
-    <div class="tree" id="tree"></div>
+    <div class="tree" id="tree" aria-hidden="true"></div>
     <div class="sceneUnicorn" id="sceneUni"></div>
   </div>
 
@@ -136,13 +150,26 @@
       <button class="smallBtn reset" id="resetBtn">Nullstill runde</button>
     </div>
     <p class="savedNote">Fremdriften lagres automatisk ✓</p>
+    <details class="backup">
+      <summary>Sikkerhetskopi og flytting</summary>
+      <p class="backupHelp">Stjernene ligger bare på denne telefonen. Kopier koden
+        og ta vare på den, eller send den til den andre forelderen.</p>
+      <textarea id="exportField" rows="3" readonly aria-label="Kode med fremdriften"></textarea>
+      <div class="btnRow"><button class="smallBtn" id="copyBtn">Kopier koden</button></div>
+      <p class="backupHelp">Lim inn en kode her for å hente inn fremdrift. Det som
+        ligger her nå blir erstattet.</p>
+      <textarea id="importField" rows="3" placeholder="Lim inn kode her" aria-label="Lim inn kode"></textarea>
+      <div class="btnRow"><button class="smallBtn" id="importBtn">Hent inn</button></div>
+      <p class="backupMsg" id="backupMsg" role="status" aria-live="polite"></p>
+    </details>
   </div>
 </div>
 
 <div class="overlay" id="overlay">
-  <div class="overlayCard">
+  <div class="overlayCard" role="dialog" aria-modal="true" aria-labelledby="hurra">
+    <button class="lukkBtn" id="lukkBtn" aria-label="Lukk">✕</button>
     <div class="wiggle" id="overlayUni"></div>
-    <h2 class="hurra">HURRA, SELMA!</h2>
+    <h2 class="hurra" id="hurra">HURRA, SELMA!</h2>
     <p class="wonText">Du fikk det magiske treet til å blomstre med <strong>10 stjerner</strong> 🌟</p>
     <p class="wonText">Du har vunnet en enhjørning! 🦄</p>
     <button class="bigBtn" id="newRoundBtn">Start ny runde</button>
@@ -155,21 +182,40 @@
   var GOAL = 10;
   var KEY = "selma-magisk-tre-v1";
 
-  var state = { stars: 0, log: [], prizesWon: 0, muted: false };
+  // Tar imot hva som helst og gir alltid en brukbar state tilbake. Et ugyldig
+  // felt faller tilbake til standardverdien — resten beholdes som det er.
+  function reinState(raw) {
+    var d = { stars: 0, log: [], prizesWon: 0, muted: false };
+    if (!raw || typeof raw !== "object" || isArray(raw)) return d;
+    var n = Math.floor(Number(raw.stars));
+    // Ikke klemt til GOAL: det som ligger på telefonen skal bevares som det er.
+    // Senker en forelder GOAL, skal stjernene komme tilbake når tallet heves.
+    if (isFinite(n) && n > 0) d.stars = n;
+    if (isArray(raw.log)) {
+      for (var i = 0; i < raw.log.length; i++) {
+        var v = raw.log[i];
+        if (typeof v === "string" && !isNaN(new Date(v).getTime())) d.log.push(v);
+      }
+    }
+    var p = Math.floor(Number(raw.prizesWon));
+    if (isFinite(p) && p > 0) d.prizesWon = p;
+    d.muted = !!raw.muted;
+    return d;
+  }
+  function isArray(v) { return Object.prototype.toString.call(v) === "[object Array]"; }
+
+  var state = reinState(null);
   try {
     var saved = localStorage.getItem(KEY);
-    if (saved) {
-      var s = JSON.parse(saved);
-      state.stars = s.stars || 0;
-      state.log = s.log || [];
-      state.prizesWon = s.prizesWon || 0;
-      state.muted = !!s.muted;
-    }
+    if (saved) state = reinState(JSON.parse(saved));
   } catch (e) {}
 
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
   }
+  // Merk: appen skriver aldri til lagringen bare fordi den åpnes, og state
+  // holder alltid det tallet som faktisk står på telefonen. Det er bare
+  // visningen som begrenses til GOAL — se vist() i paint().
 
   // ---- Lyd ----
   var actx = null;
@@ -192,7 +238,23 @@
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.start(t); o.stop(t + dur + 0.05);
   }
-  function starSound() { if (state.muted) return; tone(784,0,0.12); tone(1047,0.12,0.18); }
+  // Tonen stiger med antall stjerner, så barnet hører at det nærmer seg målet.
+  // Durskala fra G4, med oktavskift videre oppover så det også holder om GOAL endres.
+  var DUR = [0, 2, 4, 5, 7, 9, 11];
+  function trinn(n) {
+    // Skalaen spres over runden i stedet for ett trinn per stjerne, så siste
+    // stjerne før mål alltid lander på samme topptone — også ved høy GOAL,
+    // der faste trinn ville blitt skingrende.
+    var siste = Math.max(1, GOAL - 2);
+    var d = Math.round(n / siste * 8);
+    return DUR[d % 7] + 12 * Math.floor(d / 7);
+  }
+  function starSound(n) {
+    if (state.muted) return;
+    var f = 392 * Math.pow(2, trinn(n) / 12);
+    tone(f, 0, 0.12);
+    tone(f * Math.pow(2, 5 / 12), 0.12, 0.18);
+  }
   function winSound() { if (state.muted) return; [659,784,988,1319].forEach(function(f,i){ tone(f,i*0.14,0.24,0.13,"triangle"); }); }
 
   // ---- Enhjørning (Twemoji, CC-BY 4.0) ----
@@ -228,28 +290,58 @@
     logList: document.getElementById("logList"),
     undoBtn: document.getElementById("undoBtn"),
     overlay: document.getElementById("overlay"),
+    exportField: document.getElementById("exportField"),
+    importField: document.getElementById("importField"),
+    backupMsg: document.getElementById("backupMsg"),
     sceneUni: function () { return document.querySelector("#sceneUni .uni"); }
   };
 
+  // Treet må få plass i scenen ved GOAL stjerner: stamme + krone + stjernen på toppen.
+  // Ringhøyden regnes ut i stedet for å være fast, så det også holder om GOAL endres.
+  var SCENE_H = 244, TREE_BOTTOM = 30, CROWN_H = 66, STAR_OVER = 16, CLEARANCE = 8;
+  var PLASS = SCENE_H - TREE_BOTTOM - CROWN_H - STAR_OVER - CLEARANCE;
+  var ringH = Math.max(6, Math.min(14, Math.floor(PLASS / GOAL)));
+  els.tree.style.setProperty("--ringH", ringH + "px");
+  // Ringene har et gulv på 6px for å være synlige i det hele tatt. Ved svært
+  // høy GOAL rekker ikke det, og da krymper hele treet i stedet for å vokse
+  // ut av scenen.
+  var trang = ringH * GOAL;
+  if (trang > PLASS) els.tree.style.transform = "translateX(-50%) scale(" + (PLASS / trang) + ")";
+
   var justEarned = -1;
+  var lastGive = 0;
 
   function paint() {
+    // Har telefonen flere stjerner enn dagens GOAL (fordi målet er senket),
+    // viser vi GOAL — men rører ikke tallet som er lagret.
+    var vist = Math.min(state.stars, GOAL);
     // stjerner
     var sg = "";
-    for (var i = 0; i < GOAL; i++) sg += starSvg(i < state.stars, i === justEarned);
+    for (var i = 0; i < GOAL; i++) sg += starSvg(i < vist, i === justEarned);
     els.starGrid.innerHTML = sg;
     // teller
-    els.count.textContent = state.stars === GOAL ? "Alle 10! 🎉" : state.stars + " av " + GOAL;
+    // Synlig tekst er kort; den som hører den trenger hele setningen.
+    var synlig = vist === GOAL ? "Alle " + GOAL + "! 🎉" : vist + " av " + GOAL;
+    var lest = vist === GOAL
+      ? "Alle " + GOAL + " stjerner samlet! Treet blomstrer."
+      : vist + " av " + GOAL + " stjerner";
+    // Bare skriv om når noe faktisk er endret, ellers leses telleren opp på
+    // nytt hver gang paint() kjøres av noe annet, f.eks. lyd av/på.
+    if (els.count.getAttribute("data-lest") !== lest) {
+      els.count.setAttribute("data-lest", lest);
+      els.count.innerHTML = '<span aria-hidden="true">' + synlig + '</span>'
+                          + '<span class="sr">' + lest + '</span>';
+    }
     // tre — stammen vokser for hver stjerne
     var t = "";
-    for (var c = 0; c < state.stars; c++) {
-      var anim = (c === state.stars - 1) ? ' style="animation:dropIn .4s ease both"' : '';
+    for (var c = 0; c < vist; c++) {
+      var anim = (c === vist - 1) ? ' style="animation:dropIn .4s ease both"' : '';
       t += '<div class="ring"' + anim + '>'
          + (c === 2 || c === 5 ? '<span class="leaf l"></span><span class="leaf r"></span>' : '')
          + '</div>';
     }
-    if (state.stars > 0) {
-      var bloom = state.stars >= GOAL;
+    if (vist > 0) {
+      var bloom = vist >= GOAL;
       t += '<div class="crown' + (bloom ? ' bloom' : '') + '">'
          + '<div class="blob b2"></div><div class="blob b3"></div>'
          + '<div class="blob b4"></div><div class="blob b5"></div><div class="blob b1"></div>'
@@ -262,20 +354,24 @@
     }
     els.tree.innerHTML = t;
     // premie
-    els.prizeBox.className = "prizeBox" + (state.stars >= GOAL ? " won" : "");
+    els.prizeBox.className = "prizeBox" + (vist >= GOAL ? " won" : "");
     // knapp / lyd
     els.giveBtn.disabled = state.stars >= GOAL;
     els.soundBtn.textContent = state.muted ? "🔇" : "🔊";
+    els.soundBtn.setAttribute("aria-label", state.muted ? "Slå lyden på" : "Slå lyden av");
     // voksen-panel
     els.prizesWon.textContent = state.prizesWon + " 🦄";
-    els.roundCount.textContent = state.stars + " / " + GOAL;
+    els.roundCount.textContent = vist + " / " + GOAL;
     els.undoBtn.disabled = state.stars === 0;
     var ll = "";
-    for (var k = 0; k < state.log.length; k++) {
-      var dd = new Date(state.log[k]).toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" });
+    var logg = state.log.length > vist ? state.log.slice(state.log.length - vist) : state.log;
+    for (var k = 0; k < logg.length; k++) {
+      var dd = new Date(logg[k]).toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" });
       ll += '<span class="logItem">🌟 ' + dd + '</span>';
     }
     els.logList.innerHTML = ll;
+    // sikkerhetskopi
+    els.exportField.value = JSON.stringify(state);
   }
 
   function confetti() {
@@ -292,33 +388,113 @@
     }
   }
 
-  function showOverlay() { els.overlay.classList.add("show"); confetti(); }
+  function showOverlay() {
+    els.overlay.classList.add("show");
+    confetti();
+    var b = document.getElementById("newRoundBtn");
+    if (b) b.focus();
+  }
+
+  // Feiringen skal kunne lukkes uten å starte ny runde. Før var «Start ny
+  // runde» den eneste nåbare knappen, og den nullstiller tavla — så den som
+  // bare ville se på treet, måtte slette det.
+  function hideOverlay() {
+    if (!els.overlay.classList.contains("show")) return;
+    els.overlay.classList.remove("show");
+    els.giveBtn.focus();
+  }
+  document.getElementById("lukkBtn").addEventListener("click", hideOverlay);
+  els.overlay.addEventListener("click", function (e) {
+    if (e.target === els.overlay) hideOverlay();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" || e.key === "Esc") hideOverlay();
+  });
 
   function give() {
     if (state.stars >= GOAL) return;
+    // Knappen er stor og innbydende, og dobbelttrykk-zoom er av. To raske trykk
+    // skal være én stjerne, ikke to.
+    var now = Date.now();
+    if (now - lastGive < 800) return;
+    lastGive = now;
     state.stars++;
     state.log.push(new Date().toISOString());
     justEarned = state.stars - 1;
     save();
     paint();
+    // paint() har brukt den nå. Uten dette spretter samme stjerne opp igjen
+    // hver gang paint() kjøres av noe annet, f.eks. lyd av/på.
+    justEarned = -1;
     var u = els.sceneUni();
     if (u) { u.classList.add("magic"); setTimeout(function () { u.classList.remove("magic"); }, 450); }
     if (state.stars >= GOAL) { winSound(); setTimeout(showOverlay, 650); }
-    else { starSound(); }
+    else { starSound(state.stars - 1); }
   }
+
+  // ---- Sikkerhetskopi ----
+  function melding(tekst, klasse) {
+    els.backupMsg.textContent = tekst;
+    els.backupMsg.className = "backupMsg " + klasse;
+  }
+
+  // Skiller mellom "dette er ikke en kode" og "dette er en kode med rare felter".
+  // reinState() reparerer det siste; det første skal avvises, ikke stilltiende
+  // gjøres om til en tom tavle.
+  function tolkKode(tekst) {
+    var raw;
+    try { raw = JSON.parse(String(tekst).trim()); } catch (e) { return null; }
+    if (!raw || typeof raw !== "object" || isArray(raw)) return null;
+    if (raw.stars === undefined && raw.log === undefined) return null;
+    return reinState(raw);
+  }
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var tekst = els.exportField.value;
+    els.exportField.focus();
+    els.exportField.select();
+    function gikkBra() { melding("Kopiert ✓ Lim den inn et trygt sted.", "ok"); }
+    function gikkIkke() { melding("Fikk ikke kopiert. Merk teksten og kopier den selv.", "feil"); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tekst).then(gikkBra, function () {
+        try { document.execCommand("copy") ? gikkBra() : gikkIkke(); } catch (e) { gikkIkke(); }
+      });
+    } else {
+      try { document.execCommand("copy") ? gikkBra() : gikkIkke(); } catch (e) { gikkIkke(); }
+    }
+  });
+
+  document.getElementById("importBtn").addEventListener("click", function () {
+    var tekst = els.importField.value;
+    if (!tekst || !tekst.trim()) { melding("Lim inn en kode først.", "feil"); return; }
+    var ny = tolkKode(tekst);
+    if (!ny) { melding("Dette ser ikke ut som en kode fra appen. Sjekk at hele ble med.", "feil"); return; }
+    var hva = ny.stars + (ny.stars === 1 ? " stjerne" : " stjerner")
+            + " og " + ny.prizesWon + (ny.prizesWon === 1 ? " premie" : " premier");
+    if (!window.confirm("Hente inn " + hva + "?\n\nDet som ligger her nå blir borte.")) return;
+    state = ny;
+    justEarned = -1;
+    lastGive = 0;
+    save();
+    paint();
+    els.importField.value = "";
+    els.overlay.classList.remove("show");
+    if (state.stars >= GOAL) showOverlay();
+    melding("Hentet inn ✓ " + hva + ".", "ok");
+  });
 
   els.giveBtn.addEventListener("click", give);
   els.soundBtn.addEventListener("click", function () { state.muted = !state.muted; save(); paint(); });
   els.undoBtn.addEventListener("click", function () {
     if (state.stars <= 0) return;
-    state.stars--; state.log.pop(); justEarned = -1; save(); paint();
+    state.stars--; state.log.pop(); justEarned = -1; lastGive = 0; save(); paint();
   });
   document.getElementById("resetBtn").addEventListener("click", function () {
-    state.stars = 0; state.log = []; justEarned = -1; save(); paint();
+    state.stars = 0; state.log = []; justEarned = -1; lastGive = 0; save(); paint();
     els.overlay.classList.remove("show");
   });
   document.getElementById("newRoundBtn").addEventListener("click", function () {
-    state.prizesWon++; state.stars = 0; state.log = []; justEarned = -1; save(); paint();
+    state.prizesWon++; state.stars = 0; state.log = []; justEarned = -1; lastGive = 0; save(); paint();
     els.overlay.classList.remove("show");
   });
   document.getElementById("grownupToggle").addEventListener("click", function () {
