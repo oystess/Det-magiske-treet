@@ -3,7 +3,8 @@ var f = require("./felles.js");
 var s = f.suite("uu");
 
 (async function () {
-  var b = await f.start();
+  var b2 = await f.start();
+  var b = b2;
   var ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
   var p = await ctx.newPage();
   var jsfeil = []; p.on("pageerror", function (e) { jsfeil.push(e.message); });
@@ -165,6 +166,19 @@ var s = f.suite("uu");
     });
     return ut;
   }), []);
+
+  // Redusert bevegelse skal fjerne bevegelse, ikke all tilbakemelding.
+  var rm = await b2.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+  var p2 = await rm.newPage();
+  await p2.goto(f.APP); await p2.waitForTimeout(300);
+  s.t("redusert bevegelse stopper animasjonene", await p2.evaluate(function () {
+    return getComputedStyle(document.querySelector("#sceneUni .uni")).animationName;
+  }), "none");
+  s.t("redusert bevegelse beholder overganger", await p2.evaluate(function () {
+    var t = getComputedStyle(document.querySelector(".bigBtn")).transitionProperty;
+    return t !== "none" && t !== "all";
+  }), true);
+  await rm.close();
 
   s.t("ingen JS-feil", jsfeil, []);
   await b.close();

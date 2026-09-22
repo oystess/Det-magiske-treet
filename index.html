@@ -96,8 +96,35 @@
   .prizeLabel { font-size: 12px; font-weight: 800; color: #6E4A8C; margin-bottom: 2px; font-family: Fredoka, sans-serif; }
   .prizeBox { width: 60px; height: 52px; background: rgba(251,244,255,.85); border: 3px dashed #9B6FD0; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
   .prizeBox.won { box-shadow: 0 0 0 4px #FFD23F, 0 8px 18px rgba(155,93,229,.4); }
-  .uni { transition: transform .35s ease; transform-origin: 50% 92%; }
-  .uni.magic { transform: translateY(-6px) rotate(-3deg); }
+  .uni { transform-origin: 50% 92%; }
+  /* Fem reaksjoner. Enhjørningen gjorde før det samme hver gang: 6px opp og
+     3 grader. Nå velges én tilfeldig, aldri samme to ganger på rad. */
+  .uni.r1 { animation: galopp .9s cubic-bezier(.4,0,.3,1) both; }
+  .uni.r2 { animation: sprett .7s cubic-bezier(.3,1.7,.5,1) both; }
+  .uni.r3 { animation: snurr .8s ease-in-out both; }
+  .uni.r4 { animation: slaattBakover .9s cubic-bezier(.3,1.4,.5,1) both; }
+  .uni.r5 { animation: vippe .8s ease-in-out both; }
+  @keyframes galopp { 0%{transform:translateX(0)} 30%{transform:translateX(34px) translateY(-9px) rotate(4deg)}
+    55%{transform:translateX(46px)} 100%{transform:translateX(0)} }
+  @keyframes sprett { 0%,100%{transform:translateY(0) scaleY(1)} 25%{transform:translateY(0) scaleY(.82)}
+    60%{transform:translateY(-26px) scaleY(1.1)} }
+  @keyframes snurr { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+  @keyframes slaattBakover { 0%,100%{transform:translateX(0) rotate(0)}
+    35%{transform:translateX(-18px) rotate(-14deg)} 70%{transform:translateX(4px) rotate(3deg)} }
+  @keyframes vippe { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-11deg)} 60%{transform:rotate(9deg)} }
+  /* Liv mellom stjernene: pusting og blunking, så scenen ikke er et stillbilde. */
+  #sceneUni .uni { animation: puste 3.6s ease-in-out infinite; }
+  #sceneUni .uni.r1, #sceneUni .uni.r2, #sceneUni .uni.r3,
+  #sceneUni .uni.r4, #sceneUni .uni.r5 { animation-iteration-count: 1; }
+  @keyframes puste { 0%,100%{transform:translateY(0) scaleY(1)} 50%{transform:translateY(-1.5px) scaleY(1.015)} }
+  .oye { animation: blunk 5.2s ease-in-out infinite; transform-origin: center; }
+  @keyframes blunk { 0%,95%,100%{transform:scaleY(1)} 97.5%{transform:scaleY(.1)} }
+  .hale { transform-origin: 24% 55%; animation: svinse 2.8s ease-in-out infinite; }
+  @keyframes svinse { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(4deg)} }
+  /* Treet rister når det vokser. */
+  .tree.rister { animation: riste .5s ease-in-out; }
+  @keyframes riste { 0%,100%{transform:translateX(-50%) rotate(0)} 25%{transform:translateX(-50%) rotate(1.6deg)}
+    75%{transform:translateX(-50%) rotate(-1.6deg)} }
   .bigBtn { display: block; touch-action: manipulation; width: calc(100% - 28px); margin: 0 14px 6px; padding: 18px 16px; font-family: Fredoka, sans-serif; font-size: 24px; font-weight: 700; color: #4A2E5E; background: linear-gradient(#FFC2E2, #C79DEB); border: none; border-radius: 18px; box-shadow: 0 6px 0 #9B6FD0, 0 10px 18px rgba(155,93,229,.35); cursor: pointer; }
   .bigBtn:active { transform: translateY(3px); box-shadow: 0 3px 0 #9B6FD0; }
   .bigBtn:disabled { opacity: .5; cursor: default; transform: none; box-shadow: 0 6px 0 #9B6FD0; }
@@ -145,7 +172,13 @@
   @keyframes blomstre { from{transform:scale(0) rotate(-60deg)} to{transform:scale(1) rotate(0)} }
   @keyframes sparkleGlow { 0%,100%{filter:drop-shadow(0 0 6px rgba(255,210,120,.5))} 50%{filter:drop-shadow(0 0 16px rgba(255,210,120,.95))} }
   button:focus-visible { outline: 4px solid #7E57C2; outline-offset: 3px; }
-  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  /* Fjern bevegelse og blinking, men behold tilbakemelding på trykk — uten
+     den skjer det ingenting synlig når barnet trykker. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-property: opacity, background-color, color, box-shadow !important; }
+    .bigBtn:active { transform: none; box-shadow: 0 3px 0 #9B6FD0; }
+    .star.pop { animation: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -514,6 +547,26 @@
     return '<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#C79DEB"/></svg>';
   }
 
+  // Fem reaksjoner, tilfeldig valgt, men aldri den samme to ganger på rad.
+  var sisteReaksjon = 0;
+  function reager() {
+    var n;
+    do { n = 1 + Math.floor(Math.random() * 5); } while (n === sisteReaksjon);
+    sisteReaksjon = n;
+    var u = els.sceneUni();
+    if (u) {
+      u.classList.remove("r1", "r2", "r3", "r4", "r5");
+      void u.offsetWidth;            // tving omstart av animasjonen
+      u.classList.add("r" + n);
+      setTimeout(function () { u.classList.remove("r" + n); }, 950);
+    }
+    var t = els.tree;
+    t.classList.remove("rister");
+    void t.offsetWidth;
+    t.classList.add("rister");
+    setTimeout(function () { t.classList.remove("rister"); }, 520);
+  }
+
   function confetti() {
     for (var i = 0; i < 28; i++) {
       var s = document.createElement("span");
@@ -565,8 +618,7 @@
     // paint() har brukt den nå. Uten dette spretter samme stjerne opp igjen
     // hver gang paint() kjøres av noe annet, f.eks. lyd av/på.
     justEarned = -1;
-    var u = els.sceneUni();
-    if (u) { u.classList.add("magic"); setTimeout(function () { u.classList.remove("magic"); }, 450); }
+    reager();
     if (state.stars >= GOAL) { winSound(); setTimeout(showOverlay, 650); }
     else { starSound(state.stars - 1); }
   }

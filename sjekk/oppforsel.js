@@ -135,6 +135,30 @@ var s = f.suite("oppforsel");
   s.t("stjernene er tilbake når GOAL heves igjen", await stjerner(), 8);
   fsm.unlinkSync(lavG);
 
+  // Fem reaksjoner skal faktisk brukes, og aldri to like på rad.
+  await p.evaluate(function () {
+    localStorage.setItem("selma-magisk-tre-v1",
+      JSON.stringify({ stars: 0, log: [], prizesWon: 0, muted: true }));
+  });
+  await p.reload(); await p.waitForTimeout(300);
+  var sett = [], rekke = [];
+  for (var r = 0; r < 9; r++) {
+    await p.click("#giveBtn");
+    var kl = await p.evaluate(function () {
+      var u = document.querySelector("#sceneUni .uni");
+      return (u.className.baseVal || u.getAttribute("class") || "").match(/r[1-5]/);
+    });
+    var n = kl ? kl[0] : "ingen";
+    rekke.push(n);
+    if (sett.indexOf(n) < 0) sett.push(n);
+    await p.waitForTimeout(900);
+  }
+  var toLike = false;
+  for (var q = 1; q < rekke.length; q++) if (rekke[q] === rekke[q - 1]) toLike = true;
+  s.t("aldri samme reaksjon to ganger på rad", toLike, false);
+  s.t("flere reaksjoner er i bruk (så " + sett.length + " av 5)", sett.length >= 3, true);
+  s.t("alltid en reaksjon", rekke.indexOf("ingen"), -1);
+
   s.t("ingen JS-feil underveis", jsfeil, []);
   await b.close();
   s.slutt();
