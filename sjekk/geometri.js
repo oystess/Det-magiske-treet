@@ -92,6 +92,29 @@ var s = f.suite("geometri");
   }
   s.t("treet får plass også ved endret GOAL", klippet, []);
 
+  // riste-keyframene setter hele transform-en. Ved høy GOAL ligger krympingen
+  // i --treSkala; en keyframe uten den kastet den bort, og treet spratt ut av
+  // scenen ved hver eneste stjerne — akkurat feilen 86c2323 fjernet.
+  var tmpR = ptg.join(osg.tmpdir(), "riste-" + process.pid + ".html");
+  fsg.writeFileSync(tmpR, kilde.replace("var GOAL = 10;", "var GOAL = 30;"));
+  var cR = await b.newContext({ viewport: { width: 390, height: 844 } });
+  await f.medStjerner(cR, 20);
+  var pR = await cR.newPage();
+  await pR.goto("file://" + tmpR); await pR.waitForTimeout(300);
+  s.t("treet beholder krympingen mens det rister", await pR.evaluate(async function () {
+    function skala() {
+      return +getComputedStyle(document.getElementById("tree")).transform.match(/[-\d.]+/g)[0];
+    }
+    var f0 = skala(), verst = f0;
+    document.getElementById("giveBtn").click();
+    for (var i = 0; i < 6; i++) {
+      await new Promise(function (r) { setTimeout(r, 70); });
+      if (Math.abs(skala() - f0) > Math.abs(verst - f0)) verst = skala();
+    }
+    return Math.abs(verst - f0) < 0.02;
+  }), true);
+  await cR.close(); fsg.unlinkSync(tmpR);
+
   await b.close();
   s.slutt();
 })();

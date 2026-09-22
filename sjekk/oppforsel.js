@@ -159,6 +159,43 @@ var s = f.suite("oppforsel");
   s.t("flere reaksjoner er i bruk (så " + sett.length + " av 5)", sett.length >= 3, true);
   s.t("alltid en reaksjon", rekke.indexOf("ingen"), -1);
 
+  // Klassenavnet sier ingenting om hva nettleseren faktisk kjører. En
+  // id-selektor et annet sted i arket kan vinne spesifisitet over .uni.rN —
+  // og gjorde det: alle fem ga "puste" i stedet for sin egen animasjon.
+  // Uttrykket «overrasket» var tegnet, men aldri rendret. Ansiktet skal følge
+  // reaksjonen, ikke stå fast.
+  var uttrykk = function () {
+    return p.evaluate(function () {
+      var u = document.querySelector("#sceneUni .uni");
+      var vis = [].slice.call(u.querySelectorAll(".f")).filter(function (g) {
+        return getComputedStyle(g).display !== "none";
+      }).map(function (g) { return g.getAttribute("class").replace("f f-", ""); });
+      return vis.join(",") || "ingen";
+    });
+  };
+  await p.waitForTimeout(900);
+  var uHvile = await uttrykk();
+  await p.click("#giveBtn"); await p.waitForTimeout(80);
+  var uStraks = await uttrykk();
+  await p.waitForTimeout(350);
+  var uSenere = await uttrykk();
+  await p.waitForTimeout(700);
+  s.t("ansiktet følger reaksjonen", [uHvile, uStraks, uSenere, await uttrykk()],
+      ["ro", "overrasket", "glad", "ro"]);
+
+  s.t("reaksjonsklassen gir faktisk reaksjonens animasjon", await p.evaluate(function () {
+    var u = document.querySelector("#sceneUni .uni");
+    var opphav = u.getAttribute("class");
+    var ventet = ["galopp", "sprett", "snurr", "slaattBakover", "vippe"], ut = [];
+    for (var n = 1; n <= 5; n++) {
+      u.setAttribute("class", "uni r" + n);
+      var navn = getComputedStyle(u).animationName;
+      if (navn.indexOf(ventet[n - 1]) < 0) ut.push("r" + n + " gir " + navn);
+    }
+    u.setAttribute("class", opphav);
+    return ut;
+  }), []);
+
   s.t("ingen JS-feil underveis", jsfeil, []);
   await b.close();
   s.slutt();

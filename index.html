@@ -50,7 +50,8 @@
   .stein { position: absolute; bottom: 6px; right: 26px; width: 17px; height: 10px;
     background: #C4B7D6; border-radius: 9px 9px 3px 3px; box-shadow: inset -2px -2px 0 rgba(90,70,120,.18); }
   .engblomst { position: absolute; bottom: 20px; line-height: 0; }
-  .tree { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); transform-origin: 50% 100%; display: flex; flex-direction: column-reverse; align-items: center; }
+  .tree { position: absolute; bottom: 30px; left: 50%;
+    transform: translateX(-50%) scale(var(--treSkala, 1)); transform-origin: 50% 100%; display: flex; flex-direction: column-reverse; align-items: center; }
   /* Stammen var stablede skiver med synlig topplinje og avrundede hjørner —
      den leste som en larve. Nå er hvert ledd rett i kantene og skjøtene er
      bare en svak strek, så stammen henger sammen som ved. */
@@ -65,7 +66,11 @@
     transform-origin: 0% 50%; animation: vai 3.4s ease-in-out infinite; }
   .leaf::after { content: ""; position: absolute; left: 3px; top: 6px; width: 14px; height: 1.5px;
     background: rgba(255,255,255,.4); border-radius: 1px; transform: rotate(-12deg); }
-  .leaf.l { left: -20px; transform-origin: 100% 50%; animation-name: vaiVenstre; animation-delay: -1.7s; }
+  /* Speilingen lå før i keyframen og forsvant med prefers-reduced-motion.
+     Venstre blad har nå sin egen form i stedet for å være et speilbilde. */
+  .leaf.l { left: -20px; border-radius: 100% 0 100% 0; transform-origin: 100% 50%; animation-delay: -1.7s;
+    box-shadow: inset 2px -2px 0 rgba(30,90,65,.18); }
+  .leaf.l::after { left: 5px; transform: rotate(12deg); }
   .leaf.r { right: -20px; }
   .crown { position: relative; width: 104px; height: 66px; }
   /* Kronen var fem løse baller med hver sin gradient. Nå er de samlet under én
@@ -112,19 +117,29 @@
   @keyframes slaattBakover { 0%,100%{transform:translateX(0) rotate(0)}
     35%{transform:translateX(-18px) rotate(-14deg)} 70%{transform:translateX(4px) rotate(3deg)} }
   @keyframes vippe { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-11deg)} 60%{transform:rotate(9deg)} }
-  /* Liv mellom stjernene: pusting og blunking, så scenen ikke er et stillbilde. */
-  #sceneUni .uni { animation: puste 3.6s ease-in-out infinite; }
-  #sceneUni .uni.r1, #sceneUni .uni.r2, #sceneUni .uni.r3,
-  #sceneUni .uni.r4, #sceneUni .uni.r5 { animation-iteration-count: 1; }
+  /* Liv mellom stjernene. Pustingen ligger på beholderen, ikke på .uni:
+     #sceneUni .uni (1-0-1) slo .uni.rN (0-2-0) på spesifisitet, så
+     reaksjonene ble aldri kjørt i det hele tatt. */
+  .sceneUnicorn { transform-origin: 50% 100%; animation: puste 3.6s ease-in-out infinite; }
   @keyframes puste { 0%,100%{transform:translateY(0) scaleY(1)} 50%{transform:translateY(-1.5px) scaleY(1.015)} }
-  .oye { animation: blunk 5.2s ease-in-out infinite; transform-origin: center; }
+  /* transform-origin på SVG regnes mot viewBox (transform-box: view-box), så
+     "center" ble midt på figuren og øyet hoppet 19px ned i kroppen. */
+  .f-glad, .f-overrasket { display: none; }
+  .uni.glad .f-ro, .uni.overrasket .f-ro { display: none; }
+  .uni.glad .f-glad { display: block; }
+  .uni.overrasket .f-overrasket { display: block; }
+  .oye { animation: blunk 5.2s ease-in-out infinite; transform-origin: 78px 28px; }
   @keyframes blunk { 0%,95%,100%{transform:scaleY(1)} 97.5%{transform:scaleY(.1)} }
   .hale { transform-origin: 24% 55%; animation: svinse 2.8s ease-in-out infinite; }
   @keyframes svinse { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(4deg)} }
   /* Treet rister når det vokser. */
   .tree.rister { animation: riste .5s ease-in-out; }
-  @keyframes riste { 0%,100%{transform:translateX(-50%) rotate(0)} 25%{transform:translateX(-50%) rotate(1.6deg)}
-    75%{transform:translateX(-50%) rotate(-1.6deg)} }
+  /* Krympingen ved høy GOAL ligger i --treSkala. Uten den i keyframene kastet
+     ristingen den bort, og treet spratt ut av scenen ved hver stjerne. */
+  @keyframes riste {
+    0%,100%{transform:translateX(-50%) scale(var(--treSkala,1)) rotate(0)}
+    25%{transform:translateX(-50%) scale(var(--treSkala,1)) rotate(1.6deg)}
+    75%{transform:translateX(-50%) scale(var(--treSkala,1)) rotate(-1.6deg)} }
   .bigBtn { display: block; touch-action: manipulation; width: calc(100% - 28px); margin: 0 14px 6px; padding: 18px 16px; font-family: Fredoka, sans-serif; font-size: 24px; font-weight: 700; color: #4A2E5E; background: linear-gradient(#FFC2E2, #C79DEB); border: none; border-radius: 18px; box-shadow: 0 6px 0 #9B6FD0, 0 10px 18px rgba(155,93,229,.35); cursor: pointer; }
   .bigBtn:active { transform: translateY(3px); box-shadow: 0 3px 0 #9B6FD0; }
   .bigBtn:disabled { opacity: .5; cursor: default; transform: none; box-shadow: 0 6px 0 #9B6FD0; }
@@ -159,6 +174,7 @@
   .overlayCard { position: relative; background: #FBF4FF; border-radius: 24px; padding: 26px 22px; text-align: center; max-width: 360px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.3); border: 4px solid #FFD23F; z-index: 2; }
   .overlayCard .uni { display: inline-block; }
   .hurra { font-family: Fredoka, sans-serif; font-weight: 700; font-size: 30px; color: #9B5DE5; margin: 6px 0; }
+  .samlet { white-space: nowrap; }
   .wonText { font-size: 17px; font-weight: 700; color: #5C3D6E; margin: 4px 0; }
   .wiggle { animation: wiggle 1s ease-in-out infinite; transform-origin: 50% 92%; display: inline-block; }
   .confetti { position: absolute; top: -6vh; font-size: 26px; animation: fall linear forwards; }
@@ -168,7 +184,6 @@
   @keyframes dropIn { from{transform:translateY(-26px);opacity:0} to{transform:translateY(0);opacity:1} }
   @keyframes twinkle { 0%,100%{opacity:1} 50%{opacity:.2} }
   @keyframes vai { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(5deg)} }
-  @keyframes vaiVenstre { 0%,100%{transform:scaleX(-1) rotate(-4deg)} 50%{transform:scaleX(-1) rotate(5deg)} }
   @keyframes blomstre { from{transform:scale(0) rotate(-60deg)} to{transform:scale(1) rotate(0)} }
   @keyframes sparkleGlow { 0%,100%{filter:drop-shadow(0 0 6px rgba(255,210,120,.5))} 50%{filter:drop-shadow(0 0 16px rgba(255,210,120,.95))} }
   button:focus-visible { outline: 4px solid #7E57C2; outline-offset: 3px; }
@@ -203,7 +218,7 @@
     <div class="gress" id="gress"></div>
     <div class="stein"></div>
     <div class="engblomst" id="eng1" style="left:112px"></div>
-    <div class="engblomst" id="eng2" style="left:250px"></div>
+    <div class="engblomst" id="eng2" style="right:56px"></div>
     <div class="prizeWrap">
       <div class="prizeLabel">Premie</div>
       <div class="prizeBox" id="prizeBox"></div>
@@ -244,7 +259,7 @@
     <div class="wiggle" id="overlayUni"></div>
     <h2 class="hurra" id="hurra">HURRA, SELMA!</h2>
     <p class="wonText">Du fikk det magiske treet til å blomstre med <strong>10 stjerner</strong> <span id="wonStar"></span></p>
-    <p class="wonText">Du har vunnet en enhjørning! <span id="wonUni"></span></p>
+    <p class="wonText">Du har vunnet en <span class="samlet">enhjørning! <span id="wonUni"></span></span></p>
     <button class="bigBtn" id="newRoundBtn">Start ny runde</button>
   </div>
 </div>
@@ -347,6 +362,14 @@
     + '<ellipse cx="37" cy="74" rx="5.5" ry="15"/>'
     + '<ellipse cx="63" cy="74" rx="5.5" ry="15"/>';
 
+  // Alle tre ansiktene legges inn i scene-enhjørningen og byttes med en klasse.
+  // Å bygge SVG-en på nytt ville nullstilt blunkingen ved hvert bytte.
+  function alleAnsikter() {
+    return '<g class="f f-ro">' + ansikt("ro") + '</g>'
+         + '<g class="f f-glad">' + ansikt("glad") + '</g>'
+         + '<g class="f f-overrasket">' + ansikt("overrasket") + '</g>';
+  }
+
   function ansikt(u) {
     var oye = u === "glad"
         ? '<path d="M73 28 q5 -5 10 0" stroke="#4A2E5E" stroke-width="3" fill="none" stroke-linecap="round"/>'
@@ -366,17 +389,17 @@
       + '<path class="hale" d="M23 57 C14 57 11 66 14 74 C17 80 21 80 21 76 C17 70 17 63 24 62 Z" fill="#FFB6E1"/>'
       + '<g stroke="' + UNI_L + '" stroke-width="5" stroke-linejoin="round" fill="' + UNI_L + '">' + UNI_DELER + '</g>'
       + '<g fill="#FBF4FF">' + UNI_DELER + '</g>'
-      + '<ellipse cx="30" cy="80" rx="5" ry="4" fill="#B48CD8"/><ellipse cx="56" cy="80" rx="5" ry="4" fill="#B48CD8"/>'
-      + '<ellipse cx="37" cy="85" rx="5.5" ry="4.5" fill="#C79DEB"/><ellipse cx="63" cy="85" rx="5.5" ry="4.5" fill="#C79DEB"/>'
+      + '<ellipse cx="30" cy="80" rx="5" ry="4" fill="#9670C2"/><ellipse cx="56" cy="80" rx="5" ry="4" fill="#9670C2"/>'
+      + '<ellipse cx="37" cy="85" rx="5.5" ry="4.5" fill="#AE85D4"/><ellipse cx="63" cy="85" rx="5.5" ry="4.5" fill="#AE85D4"/>'
       + '<ellipse cx="42" cy="66" rx="20" ry="7" fill="#F3E9FC"/>'
       + '<ellipse cx="63" cy="17" rx="4" ry="2.5" fill="#FFC9E6"/>'
       + '<ellipse cx="90" cy="37" rx="1.9" ry="1.5" fill="#C9A6E6"/>'
       + '<path d="M70 19 L77 1 L79 20 Z" fill="#FFD23F" stroke="' + UNI_L + '" stroke-width="2" stroke-linejoin="round"/>'
       + '<path d="M72 15 L77.5 8 M71.5 19 L78.5 15" stroke="#E8A100" stroke-width="1.5" stroke-linecap="round"/>'
-      + '<path class="man" d="M68 14 C56 19 51 33 54 48 C55 55 61 55 61 49 C57 37 59 24 70 20 Z" fill="#9B5DE5" stroke="' + UNI_L + '" stroke-width="2" stroke-linejoin="round"/>'
-      + '<path class="man" d="M69 18 C59 23 55 34 57 45 C58 38 59 28 70 24 Z" fill="#C79DEB"/>'
-      + '<path class="man" d="M67 22 C60 27 58 36 59 44 C60 37 61 31 68 27 Z" fill="#FFB6E1"/>'
-      + ansikt(o.uttrykk || "ro")
+      + '<path d="M68 14 C56 19 51 33 54 48 C55 55 61 55 61 49 C57 37 59 24 70 20 Z" fill="#9B5DE5" stroke="' + UNI_L + '" stroke-width="2" stroke-linejoin="round"/>'
+      + '<path d="M69 18 C59 23 55 34 57 45 C58 38 59 28 70 24 Z" fill="#BE8FE4"/>'
+      + '<path d="M67 22 C60 27 58 36 59 44 C60 37 61 31 68 27 Z" fill="#FFB6E1"/>'
+      + (o.alle ? alleAnsikter() : ansikt(o.uttrykk || "ro"))
       + '</svg>';
   }
 
@@ -425,7 +448,7 @@
 
   // ---- Faste elementer ----
   document.getElementById("headUni").innerHTML = unicorn(50, {});
-  document.getElementById("sceneUni").innerHTML = unicorn(96, {});
+  document.getElementById("sceneUni").innerHTML = unicorn(96, { alle: true });
   document.getElementById("overlayUni").innerHTML = unicorn(128, { uttrykk: "glad" });
   document.getElementById("prizeBox").innerHTML = unicorn(46, {});
   document.getElementById("gress").innerHTML =
@@ -469,7 +492,7 @@
   // høy GOAL rekker ikke det, og da krymper hele treet i stedet for å vokse
   // ut av scenen.
   var trang = ringH * GOAL;
-  if (trang > PLASS) els.tree.style.transform = "translateX(-50%) scale(" + (PLASS / trang) + ")";
+  els.tree.style.setProperty("--treSkala", trang > PLASS ? (PLASS / trang) : 1);
 
   var justEarned = -1;
   var lastGive = 0;
@@ -539,12 +562,12 @@
   // Konfettien slapp systememoji, som telefonen tegner i sin egen stil.
   // Nå appens egne former: stjerne, blomst, hjerte og prikk.
   function konfettiBit(i) {
-    if (i % 4 === 0) return '<svg width="22" height="22" viewBox="0 0 24 24"><path d="' + STAR
+    if (i % 4 === 0) return '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="' + STAR
       + '" fill="#FFD23F" stroke="#E8A100" stroke-width="1.4" stroke-linejoin="round"/></svg>';
     if (i % 4 === 1) return blomstSvg(22);
-    if (i % 4 === 2) return '<svg width="20" height="20" viewBox="0 0 24 24">'
+    if (i % 4 === 2) return '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 21C5 16 2 12 2 8.6 2 5.5 4.4 3.4 7.2 3.4c1.8 0 3.6 1 4.8 2.6 1.2-1.6 3-2.6 4.8-2.6C19.6 3.4 22 5.5 22 8.6 22 12 19 16 12 21z" fill="#FF9ECF"/></svg>';
-    return '<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#C79DEB"/></svg>';
+    return '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#C79DEB"/></svg>';
   }
 
   // Fem reaksjoner, tilfeldig valgt, men aldri den samme to ganger på rad.
@@ -557,8 +580,9 @@
     if (u) {
       u.classList.remove("r1", "r2", "r3", "r4", "r5");
       void u.offsetWidth;            // tving omstart av animasjonen
-      u.classList.add("r" + n);
-      setTimeout(function () { u.classList.remove("r" + n); }, 950);
+      u.classList.add("r" + n, "overrasket");
+      setTimeout(function () { u.classList.remove("overrasket"); u.classList.add("glad"); }, 260);
+      setTimeout(function () { u.classList.remove("r" + n, "glad"); }, 950);
     }
     var t = els.tree;
     t.classList.remove("rister");

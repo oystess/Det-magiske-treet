@@ -85,7 +85,13 @@ Alt ligger i `index.html`:
   lydens tonegang tilpasser seg tallet av seg selv. Stjerner som allerede er
   samlet blir liggende urørt, også om du senker tallet og hever det igjen.
 - **Tekst (navn, premie, overskrifter):** søk i HTML-en, f.eks. «Selmas magiske tre» eller «vunnet en enhjørning».
-- **Farger:** justeres i `<style>` (lavendel `#C79DEB`, lilla `#9B5DE5`, løvverk `#4FAE86`).
+- **Farger:** scenen, kortet og knappene styres fra `<style>` (lavendel
+  `#C79DEB`, lilla `#9B5DE5`, løvverk `#4FAE86`). Figurene — enhjørning,
+  stjerner, blomster, ikoner og konfetti — tegnes som SVG i `<script>`, så
+  fargene deres ligger i `unicorn()`, `starSvg()`, `blomstSvg()`, `ikon()` og
+  `konfettiBit()`. Enhjørningens kontur er `UNI_L`.
+- **Figurene:** alt er tegnet av appen, ingen emoji og ingen bildefiler. Derfor
+  ser den lik ut på iPhone og Android.
 - **Lyd:** av/på-knappen øverst til høyre; innstillingen huskes.
 
 ---

@@ -169,16 +169,91 @@ var s = f.suite("uu");
 
   // Redusert bevegelse skal fjerne bevegelse, ikke all tilbakemelding.
   var rm = await b2.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+  await f.medStjerner(rm, 6);   // uten stjerner finnes verken krone eller blader
   var p2 = await rm.newPage();
   await p2.goto(f.APP); await p2.waitForTimeout(300);
   s.t("redusert bevegelse stopper animasjonene", await p2.evaluate(function () {
     return getComputedStyle(document.querySelector("#sceneUni .uni")).animationName;
   }), "none");
-  s.t("redusert bevegelse beholder overganger", await p2.evaluate(function () {
-    var t = getComputedStyle(document.querySelector(".bigBtn")).transitionProperty;
-    return t !== "none" && t !== "all";
+  // Geometri som bare finnes inne i en keyframe forsvinner med redusert
+  // bevegelse, fordi animation slås av med !important.
+  s.t("bladene peker hver sin vei også uten bevegelse", await p2.evaluate(function () {
+    var l = getComputedStyle(document.querySelector(".leaf.l"));
+    var r = getComputedStyle(document.querySelector(".leaf.r"));
+    return l.borderRadius !== r.borderRadius;
+  }), true);
+  // Det som faktisk gir tilbakemelding på trykk er :active-skyggen, ikke en
+  // overgang — appen har ingen transitions i det hele tatt.
+  s.t("trykk gir fortsatt synlig tilbakemelding", await p2.evaluate(function () {
+    // styleSheets[0] er Google Fonts og er kryssdomene — finn appens eget ark.
+    var ark = [].slice.call(document.styleSheets).filter(function (a) { return !a.href; })[0];
+    var r = [].slice.call(ark.cssRules);
+    function finn(sel) {
+      for (var i = 0; i < r.length; i++) {
+        if (r[i].media) { var inner = [].slice.call(r[i].cssRules);
+          for (var j = 0; j < inner.length; j++) if (inner[j].selectorText === sel) return inner[j]; }
+      }
+      return null;
+    }
+    var a = finn(".bigBtn:active");
+    return !!a && a.style.boxShadow.length > 0;
   }), true);
   await rm.close();
+
+  // transform-origin på et SVG-element regnes mot viewBox, ikke mot elementets
+  // egen boks. "center" ble dermed midt på figuren, og øyet hoppet 19px ned i
+  // kroppen hver gang enhjørningen blunket.
+  s.t("øyet blir stående når det blunker", await p.evaluate(function () {
+    var o = document.querySelector("#sceneUni .oye");
+    function midt() { var r = o.getBoundingClientRect(); return (r.top + r.bottom) / 2; }
+    var f0 = midt();
+    o.style.animation = "none"; o.style.transform = "scaleY(.1)";
+    var f1 = midt();
+    o.style.animation = ""; o.style.transform = "";
+    return Math.abs(f1 - f0) < 2;
+  }), true);
+
+  // Kroppens fyll ER bakgrunnsfargen på to av stedene — derfor har figuren
+  // kontur. Da må konturen skille seg fra hver bakgrunn, og detaljene som
+  // tegnes oppå kroppen må gjøre det samme. Manens midtlag hadde nøyaktig
+  // headerens farge og forsvant som et bånd tvers over halsen.
+  s.t("figuren skiller seg fra hver bakgrunn den brukes mot", await p.evaluate(function () {
+    function hex(rgb) {
+      var v = (rgb.match(/\d+/g) || []).slice(0, 3);
+      return v.length === 3 ? "#" + v.map(function (x) {
+        return ("0" + (+x).toString(16)).slice(-2); }).join("").toUpperCase() : "";
+    }
+    var KONTUR = "#CDB3E6";
+    var steder = [
+      ["#headUni", hex(getComputedStyle(document.querySelector(".header")).backgroundColor)],
+      ["#overlayUni", hex(getComputedStyle(document.querySelector(".overlayCard")).backgroundColor)],
+      ["#prizeBox", "#FBF4FF"]
+    ];
+    var ut = [];
+    steder.forEach(function (par) {
+      if (KONTUR === par[1]) ut.push(par[0] + ": konturen er lik bakgrunnen");
+      // Detaljene er baner rett under <svg>. Kroppsgruppene (<g>) utelates: de har
+      // med hensikt bakgrunnens farge, og konturgruppen under bærer silhuetten.
+      Array.prototype.forEach.call(
+        document.querySelectorAll(par[0] + " > svg > *:not(g)[fill]"), function (e) {
+          if ((e.getAttribute("fill") || "").toUpperCase() === par[1])
+            ut.push(par[0] + ": en detalj har bakgrunnens farge " + par[1]);
+        });
+    });
+    return ut;
+  }), []);
+
+  // Hensikten med d7dab9f var at figuren står på linja, ikke at den er liten.
+  await p.evaluate(function () { document.querySelector(".overlay").classList.add("show"); });
+  await p.waitForTimeout(150);
+  s.t("enhjørningen står på samme linje som seiersteksten", await p.evaluate(function () {
+    var sp = document.querySelector(".samlet");
+    var t = sp.firstChild, r = document.createRange();
+    r.setStart(t, 0); r.setEnd(t, t.length);
+    var rek = r.getClientRects(), siste = rek[rek.length - 1];
+    var u = document.querySelector("#wonUni svg").getBoundingClientRect();
+    return Math.abs((u.top + u.bottom) / 2 - (siste.top + siste.bottom) / 2) < 8;
+  }), true);
 
   s.t("ingen JS-feil", jsfeil, []);
   await b.close();

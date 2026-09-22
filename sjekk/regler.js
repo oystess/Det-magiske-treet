@@ -46,6 +46,11 @@ for (var ci = 0; ci < src.length; ci++) {
 }
 s.t("ingen systememoji i appen", emoji, []);
 
+// Dekorative figurer skal være aria-hidden. Konfettien var det ikke.
+var umerket = (src.match(/<svg(?![^>]*aria-hidden)[^>]*>/g) || [])
+  .map(function (t) { return t.slice(0, 50); });
+s.t("alle svg-er er merket dekorative", umerket, []);
+
 // --- offline ---
 (async function () {
   var b = await f.start();
